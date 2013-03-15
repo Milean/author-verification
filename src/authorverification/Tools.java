@@ -56,10 +56,30 @@ public class Tools {
 	 * @param n The value for n. For example, a value of 3 will give a list of 3-grams.
 	 * @return A map of character n-grams, with a count how often each n-gram occurs in the given String.
 	 */
-	public static HashMap<String, Double> getCharacterNGrams(Reader r, int n) throws IOException{
+	public static HashMap<String, Double> getCharacterNGrams(Reader reader, int n) throws IOException{
 		HashMap<String, Double> ngrams = new HashMap<String, Double>();
 		
-		NGramTokenizer ngramTok = new NGramTokenizer(r, n, n);
+		ngrams = addCharacterNGrams(reader, n, ngrams);
+		
+		return ngrams;
+	}
+	
+	/**
+	 * Returns a map of character n-grams contained in this reader combined with all n-grams already
+	 * provided, with a count how often each n-gram occurs.
+	 * 
+	 * @param input The string to split up into n-grams.
+	 * @param n The value for n. For example, a value of 3 will give a list of 3-grams.
+	 * @param ngrams The HashMap containing existing n-grams.
+	 * 
+	 * @return A map of character n-grams, with a count how often each n-gram occurs in the given String.
+	 */
+	public static HashMap<String, Double> addCharacterNGrams(Reader reader, int n, HashMap<String, Double> ngrams) throws IOException{
+		if(ngrams == null){
+			ngrams = new HashMap<String, Double>();
+		}
+		
+		NGramTokenizer ngramTok = new NGramTokenizer(reader, n, n);
 		CharTermAttribute terms = ngramTok.addAttribute(CharTermAttribute.class);
 		while(ngramTok.incrementToken()){
 			String ngram = terms.toString();
@@ -77,7 +97,7 @@ public class Tools {
 	
 
 	
-	public static Map<String, Double> normalizeNGrams(Map<String, Double> ngrams){
+	public static HashMap<String, Double> normalizeNGrams(Map<String, Double> ngrams){
 		HashMap<String, Double> result = new HashMap<String, Double>();
 		double amount = 0;
 		Set<String> keys = ngrams.keySet();
@@ -125,7 +145,7 @@ public class Tools {
 	 * @param file The File all N-grams should be read from.
 	 * @return A Map containing all N-grams with the amount of occurrance, or null in case of a reading error.
 	 */
-	public static Map<String, Double> readCharacterNGrams(File file){
+	public static HashMap<String, Double> readCharacterNGrams(File file){
 		try {
 			HashMap<String, Double> ngrams = new HashMap<String, Double>();
 			
@@ -155,7 +175,7 @@ public class Tools {
 	 * @param filter The list of keys that will be kept. 
 	 * @return A new Map, containing only key-value pairs where the key is contained in the filter Set. 
 	 */
-	public static Map<String, Double> keepAllContaining(Map<String, Double> data, Set<String> filter){
+	public static HashMap<String, Double> keepAllContaining(Map<String, Double> data, Set<String> filter){
 		HashMap<String, Double> result = new HashMap<String, Double>();
 		for(String s : filter){
 			if(data.containsKey(s)){
@@ -172,7 +192,7 @@ public class Tools {
 	 * @param filter The list of keys that will be removed. 
 	 * @return A new Map, containing only key-value pairs where the key is not contained in the filter Set. 
 	 */
-	public static Map<String, Double> filterAllContaining(Map<String, Double> data, Set<String> filter){
+	public static HashMap<String, Double> filterAllContaining(Map<String, Double> data, Set<String> filter){
 		HashMap<String, Double> result = new HashMap<String, Double>(data);
 		for(String s : filter){
 			if(result.containsKey(s)){
