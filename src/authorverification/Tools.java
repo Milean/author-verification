@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -199,6 +201,39 @@ public class Tools {
 				result.remove(s);
 			}
 		}
+		return result;
+	}
+	
+	/**
+	 * Returns a new Map containing only the key-value pairs where the key is not contained in the filter Set.
+	 * 
+	 * @param data The old Map that will be used as base data for the filtered Map.
+	 * @param filter The list of keys that will be removed.
+	 * @param including Toggle to true to add all key-value pairs at the cut-off value as well, or false to 
+	 * only include values higher than the cutoff value (prefers a smaller or a bigger profile)
+	 *  
+	 * @return A new Map, containing only key-value pairs where the key is not contained in the filter Set. 
+	 */
+	public static HashMap<String, Double> keepHighestN(Map<String, Double> data, int n, boolean including){
+		HashMap<String, Double> result = new HashMap<String, Double>();
+		
+		ArrayList<Double> valueList = new ArrayList<Double>(data.values());
+		Collections.sort(valueList);
+		
+		double cutoffValue = 0;
+		if(valueList.size()>n){
+			cutoffValue = valueList.get(valueList.size()-n);
+		}
+		
+		for(String s : data.keySet()){
+			if(including && data.get(s) >= cutoffValue){
+				result.put(s, data.get(s));
+			}
+			else if((!including) && data.get(s) > cutoffValue){
+				result.put(s, data.get(s));
+			}
+		}
+
 		return result;
 	}
 	

@@ -6,7 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 public class BaselineNGram {
 	public static void main(String[] args) throws IOException{
@@ -29,7 +32,10 @@ public class BaselineNGram {
 			System.exit(0);
 		}
 		
+		baseNGrams(corpus, 1);
+		baseNGrams(corpus, 2);
 		baseNGrams(corpus, 3);
+		baseNGrams(corpus, 4);
 	}
 	
 
@@ -46,6 +52,10 @@ public class BaselineNGram {
 	private static void baseNGrams(File corpus, int n) throws IOException{
 		
 		File[] instances = corpus.listFiles();
+		HashMap<String, Double> distances = new HashMap<String, Double>();
+		
+		double average = 0d;
+		
 		for(File instance : instances){
 			if(instance.isDirectory()){
 				
@@ -71,24 +81,36 @@ public class BaselineNGram {
 					}
 				}
 				
-				knownAuthor = Tools.keepAllContaining(knownAuthor, unknown.keySet());
-				unknown = Tools.keepAllContaining(unknown, knownAuthor.keySet());
-				
+				knownAuthor = Tools.keepHighestN(knownAuthor, n*n*25, false);
+				unknown = Tools.keepHighestN(unknown, n*n*25, false);
+
 				knownAuthor = Tools.normalizeNGrams(knownAuthor);
 				unknown = Tools.normalizeNGrams(unknown);
 				
-				double distance = Tools.distanceStamatatos2007(knownAuthor, unknown);
-				if(distance < 1.00){
-					AccuracyReview.addJudgement(instance.getName(), true);
-				}
-				else{
-					AccuracyReview.addJudgement(instance.getName(), false);
-				}
-				System.out.println(instance.getName()+" "+distance);
+				double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
+				distances.put(instance.getName(), distance);
+				average += distance;
 			}
 		}
 		
-		System.out.println("Accuracy reached: "+AccuracyReview.accuracy());
+		average = average / ((double)distances.size());
+		
+//		System.out.println("Average is: "+average);
+
+		AccuracyReview.reset();
+		
+		for(String instance : distances.keySet()){
+			if(distances.get(instance) < average){
+				AccuracyReview.addJudgement(instance, true);
+			}
+			else{
+				AccuracyReview.addJudgement(instance, false);
+			}
+		}
+
+		System.out.println("Accuracy reached with "+n+"-grams: "+AccuracyReview.accuracy());
+
+		AccuracyReview.reset();
 	}
 	
 	public static double compare(String[] authorDocs, String unknownDoc){
