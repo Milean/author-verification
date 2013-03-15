@@ -1,0 +1,322 @@
+
+%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is the LaTeX source for the instructions to authors using
+% the LaTeX document class 'llncs.cls' for contributions to
+% the Lecture Notes in Computer Sciences series.
+% http://www.springer.com/lncs       Springer Heidelberg 2006/05/04
+%
+% It may be used as a template for your own input - copy it
+% to a new file with a new name and use it as the basis
+% for your article.
+%
+% NB: the document class 'llncs' has its own and detailed documentation, see
+% ftp://ftp.springer.de/data/pubftp/pub/tex/latex/llncs/latex2e/llncsdoc.pdf
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[runningheads,a4paper]{llncs}
+
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+
+\usepackage{url}
+\urldef{\mails}\path|m.c.vandam@student.tudelft.nl|
+\newcommand{\keywords}[1]{\par\addvspace\baselineskip
+\noindent\keywordname\enspace\ignorespaces#1}
+
+\begin{document}
+
+\mainmatter  % start of an individual contribution
+
+% first the title is needed
+\title{Survey: A comparison of markov models and n-grams for spam filtering techniques}
+
+% a short form should be given in case it is too long for the running head
+\titlerunning{Survey: spam filtering techniques}
+
+% the name(s) of the author(s) follow(s) next
+%
+% NB: Chinese authors should write their first names(s) in front of
+% their surnames. This ensures that the names appear correctly in
+% the running heads and the author index.
+%
+\author{Michiel van Dam}
+%
+
+% the affiliations are given next; don't give your e-mail address
+% unless you accept that it will be published
+\institute{Information Retrieval, Delft University of Technology,\\
+Mekelweg 4, 2628 CD  Delft, Netherlands\\
+\mails\\
+\url{http://ewi.home.tudelft.nl/en/}}
+
+%
+% NB: a more complex sample for affiliations and the mapping to the
+% corresponding authors can be found in the file "llncs.dem"
+% (search for the string "\mainmatter" where a contribution starts).
+% "llncs.dem" accompanies the document class "llncs.cls".
+%
+
+%\toctitle{Lecture Notes in Computer Science}
+%\tocauthor{Authors' Instructions}
+\maketitle
+
+\begin{abstract}
+This survey paper gives an overview of spam filtering techniques using either markov 
+models or n-grams A short introduction to na\"ive bayesian classifiers is given with 
+further explanation about n-grams and markov models and a comparison is given between
+these techniques, outlining strengths and weaknesses. Based on the presentation of these
+approaches and the performance of models that were presented at TREC conferences 2005-2007
+the conclusion can be drawn that N-gram based approaches have surpassed pure markov
+models especially for machine learning.
+\keywords{markov model, n-gram, spam, filtering, bayes}
+\end{abstract}
+
+\section{Introduction}
+Spam is a well-known concept in day-to-day e-mail communication, and spam can be 
+defined as: ``Unsolicited, unwanted email that was sent indiscriminately, directly 
+or indirectly, by a sender having no current relationship with the recipient."\cite{2005overview}
+
+Although this is by no means a new phenomenon, the battle to limit spam is still ongoing. 
+The countermeasures taken started out as manual intervention by administrators or a simple 
+rule-based filter to block spam from getting delivered. With such efforts being taken, spam
+has evolved to evade countermeasures\cite{2006survey}, upon which the countermeasures are evolving 
+to defeat this attempt by spam to evade the countermeasures\cite{2007systematic}. It is apparent 
+this makes the current spam countermeasures complex and an ever-changing research field.
+
+A spam filter can be defined as an automated technique to identify spam. 
+For usual spam filters this results in a likelihood that a certain message is 
+spam (or ham [not spam]). A threshold can be used to convert this into a 
+binary spam-or-ham decision that takes a balance into account between 
+false positives and false negatives. For finding a good balance it is important
+to note that classifying several spam messages as ham is excusable; people
+can delete them themselves, but classifying a ham message as spam is a much
+worse mistake, because it means the recipient will most likely not read the
+possibly important message. 
+
+Using statistics or probability theory it is possible to better determine the 
+likelihood that a certain message is spam. For this the Na\"ive Bayes Classifier 
+is a useful example, allowing for a calculation of spam chances based 
+upon multiple sources of evidence (the `Na\"ive' assumption is that 
+all the sources are independent, given the class)\cite{2005ngram} 
+There are numerous ways to calculate these likelihoods or to pre-process 
+a message that's about to be evaluated for spam content. Two of these ways 
+are N-gram-based approaches and Markov models, which will both be 
+explaned in more detail in subsequent sections.
+
+\section{Related Work}
+There are lots of papers that present a survey of techniques of e-mail spam 
+filtering like \cite{2007systematic,2009elsevier}. For example, \cite{2007systematic} 
+provides, next to a systematic overview of what spam is and how you can 
+detect it as such, types of classifiers and ways to filter incoming messages 
+among which whitelisting, collaborative filtering and Challenge-Response 
+systems. It also discusses automatic learning for fine-tuning the filter, in 
+several ways.
+
+In \cite{2009elsevier} several machine learning examples are summarized, 
+and each is explained with the results of influential papers on 
+the applicable subjects. For instance the work of \cite{medlock2006} 
+is presented where bigrams lead to an improved performance for a na\"ive 
+bayesian classifier compared to unigrams or, because of performance 
+tradeoffs, trigrams.
+
+Other surveys that contain the methods discussed in this paper give an overview 
+of a yearly spam-detection contest and the properties of the best-ranking 
+approach, based on the filter submissions prior to a TREC conference\cite{2005overview,2006overview,2007overview}. 
+
+\section{Evaluated Methods}
+Two of the commonly used approaches to spam filtering will be addressed in this section: Markov models and N-gram-based techniques. For N-grams it is important to first explain the Na\"ive Bayesian Classifier in more detail.
+
+\subsection{Na\"ive Bayes}
+Bayes' framework for conditional probabilities has the useful quality that it allows 
+for the updating of a probability based on new evidence from multiple sources. In 
+this classifier, a given unclassified e-mail message is denoted as $x$ and the 
+probability that a given message $x$ belongs to either $s$ (spam) or $h$ (ham) is 
+denoted as $P(s|x)$ or $P(h|x)$. Bayes' law of conditional probability now states that 
+\begin{equation}
+\label{eq:bayes}
+P(s|x)=\frac{P(x|s)P(s)}{P(x)}
+\end{equation}
+where $P(x) = P(x|s)P(s)+P(x|h)P(h)$. Here $P(x)$ is the 
+probability that any random message looks like message $x$ and $P(x|s)$ is the 
+probability that a message of the spam category looks like $x$.
+
+For computing these last two probabilities the message is split up into tokens. For each
+token the chance of occurrance in spam messages and in non-spam messages is recorded 
+from a training set of messages. Next it is assumed that occurrances of two seperate 
+tokens is statistically independent, and the probability of a spam- or ham-message being
+message $x$ can be calculated by multiplying all the chances of the observed token occurrances.
+
+\subsubsection{Token selection}
+What kind of tokens are selected is the main difference between different na\"ive 
+Bayes classifiers. By default each word can be selected as a token, so that for each
+word a seperate chance of occurring in spam and ham messages is calculated. This
+means that \texttt{information about the retrieval of lost space objects} and 
+\texttt{information retrieval on space stations} would rank the same when compared 
+to the subject of \texttt{information retrieval}, indicating that topics of two or 
+more words wouldn't be visible in this representation and typical spam subjects 
+(\texttt{free money}) would be rated inaccurately because of legitimate uses in sentences 
+or messages containing both words in an unrelated way.
+
+\subsection{N-grams}
+To reintroduce this interword dependency N adjacent words (N-grams) can be selected as 
+a token. In \texttt{information retrieval on space stations} the 2-grams (bigrams) 
+\texttt{information retrieval, retrieval on, on space, space stations} would be 
+selected. Here you would gain significant topical precision when matching it to 
+the document representation of a message that is to be classified as spam or ham, 
+but in the process you would lose the ability to classify regular messages that don't
+share a topical similarity to a message from the training corpus. This can be solved
+again by recording the single words (unigrams) as well as the bigrams. For every additional
+set of n-grams that is recorded, a more detailed spam classification can be made.
+
+To include the interaction between nearby words in sentences that don't succeed 
+eachother, without including ever longer n-grams, sparse bigrams can be used: a combination 
+of two words that occur together in a sentence, seperated by no more than $n$ words, 
+without the words occurring inbetween. For example, \texttt{I think therefore I am} 
+with $n=2$ would generate \texttt{I think, I therefore, I I, think therefore, think 
+I, think am, therefore I, therefore am, I am} as sparse bigrams. The greater $n$, 
+the less interaction there can be assumed to be among the nearby words. To make use 
+of the distance between the two words in the bigram, the distance can be recorded 
+in the bigram by putting a \texttt{?} for every omitted word, e.g. \texttt{think+?+?+am}. 
+This method is called Orthogonal sparse bigrams\cite{2007systematic} (OSB).
+
+Finally n-grams can be based on characters as well as words. Character 4-grams for the 
+previous example would be \texttt{I\_th, \_thi, thin, hink, ink\_, nk\_t} and so on, where 
+\texttt{\_} represents a space.
+
+\subsection{Markov Models}
+A Markov model is a system where the next value is predicted based on the preceding $k$ values. 
+For text messages, the characters are used as values, so a markov model would be modeling the
+probability that after the characters \texttt{to\_thin} the character \texttt{k} will appear
+next \cite{2005markovcharacter}. When matching a new message to the model, the probability of
+each character of the message is assessed based on the preceding characters. If the $k$ 
+preceding characters don't appear in the training set, the longest preceding set of
+characters that appears in the model is taken instead for determining the probability of the 
+actual character that follows.
+
+The resulting chances are combined as independent probabilities. Because the chance of each 
+character occurance on each spot is $0<p<1$, this probability converges to zero for long 
+documents, making a normalizing factor necessary, based on the document length.\cite{2005markovcharacter} The 
+normalizing factor does not influence the classification outcome, but rather makes document 
+probabilities independent of document length, which is useful for threshold-based decisions.
+
+A classification based such a character Markov model can also be adapted to incorporate context 
+chains of different levels, discounted by the amount of preceding characters. A match where 
+the preceding eight characters are the same should be valued higher than a match where only the 
+previous two characters are the same.
+
+The granularity of such markov chains can be made arbitrarily high, from whole sentences 
+as tokens to single bits in the bitstream. For example, in \cite{2005markovstatistical} 
+a dynamic Markov compression is used as a model where each bit in the message 
+bitstream is given a probability based on the preceding bits. 
+
+\subsection{Using N-grams within Markov models}
+For building a Markov model, tokens need to be selected for building the prediction chains. So 
+far for Markov models, character tokens were assumed but ofcourse word tokens or n-word tokens 
+(n-grams) are also possible. Usual Markov models use around 5 context characters because
+increasing the context order beyond that usually results in a decrease of performance\cite{teahan2000}.
+Because of this, the results for Markov model based techniques can not reliably be evaluated against
+N-gram based techniques where Markov models are also using N-grams. For evaluation the approaches
+need to be judged on merit, when comparing techniques using Markov models with (all) other techniques,
+and when comparing techniques using unigrams to techniques using bi- or N-grams.
+
+\section{Comparison}
+Where the previous section gives an introduction to both approaches, this section focuses on the 
+benefits and downsides of either approach. The approaches can be judged on memory requirements but 
+also on the speed of classification (efficiency) and on the correctness of classifications (effectiveness).
+
+\subsection{Memory}
+A clear downside of n-grams is the increased number of features that have to be stored: 
+the number of possible combinations of words is exponential with regard to $n$. For 
+trigrams it already shows that the additional computations required don't weigh up 
+to the additional detail that is captured, because topics consisting of three 
+words (like \texttt{world trade centre}) occur very sparsely as bigrams (e.g. 
+\texttt{world trade} and \texttt{trade centre}) when not discussing the same 
+topic\cite{2007systematic}.
+
+For Markov models memory is also an issue. In \cite{2005markovcharacter} it was found that the model
+needed to be pruned after training on roughly 15.000 sample messages due to memory constraints.
+When the maximum number of pre-recorded characters is 6 at most, when estimating around 100 possible
+characters, including punctuation, in every position, the maximum number of character 6-grams is $10^{12}$.
+Because the number of words in the English language has been estimated to be more than $10^6$ as of 2012\cite{2012english},
+this means there are roughly as much character 6-grams as possible bigrams in the English language.
+
+\subsection{Spam detection}
+For the TREC 2005 corpora the PPM\cite{2005markovcharacter} (Prediction by Partial Matching) approach 
+using a Markov model performed clearly the best in all instances\cite{2007systematic}, leading to it becoming a standard to 
+test against for TREC in next years. All bag-of-words approaches (including na\"ive bayesian classifiers using n-grams) were
+left far behind. The PPM Markov model was used on the TREC 2005 corpora using either 4, 6 or 8 context characters, and it 
+was shown that the nature of the corpus had more influence on PPM performance than the number of context characters. While
+6 characters performed overall best out of these three options, the model seems robust for the choice of this parameter\cite{2005markovcharacter}.
+
+For TREC 2006 the general filter effectiveness rose and several other approaches came 
+close to PPM. OSBF-Lua\cite{2006osbflua}, which is based on orthogonal sparse bigrams, 
+was shown to have several approaches that equaled or even bettered PPM\cite{2007systematic}.
+However, OSBF-Lua was considered by the authors to perform this well because of their
+enhanced training method.
+
+For TREC 2007 the best performing model was ROSVM\cite{2007rosvm} which uses binary
+features and character 4-grams. Its success was also caused by its online active 
+learning features, updating the model when new messages have been processed.
+
+For learning features, it is suspected that much improvement can still be made for
+the PPM approach that appeared in 2005. All approaches that performed well on TREC
+2005 were considered fairly weak in terms of machine learning\cite{2007systematic}.
+Because the n-gram based approaches were evolving rapidly in TREC 2006 and TREC 2007,
+they surpassed PPM in machine learning. This trend was visible for all compression
+models\cite{2007overview}. However, the PPM method has still be improved by using
+Dynamic Markov Compression and using only a 2500 byte prefix of the message for
+classification rather than the entire messace, which led to improved efficiency and, 
+more surprising, to more effectiveness\cite{2007systematic}.
+
+\section{Conclusions}
+Spam filters are improving rapidly and so is the best approach to filtering. Where 
+Markov compression was the best filter in 2005, more recently it has been surpassed 
+by newer models. Meanwhile both N-gram based approaches and Markov models have proven
+that they can increase filtering effectiveness. 
+
+Both for N-grams and Markov context chains there is a tradeoff between efficiency 
+and effectiveness. For Markov context chains it is known that for more than 5 tokens
+of context the efficiency degrades too much compared to the effectiveness gain. 
+For N-gram approaches the orthogonal sparse bigrams appeared to have most merit 
+for effective spam recognition, providing a good tradeoff between efficiency while 
+still giving a good effectiveness.
+
+Based on more recent performances of both models, it can be concluded that N-gram
+based approaches like orthogonal sparse bigrams have surpassed markov models in terms
+of both efficiency and effectiveness, as of 2007.
+
+\begin{thebibliography}{4}
+
+%References discussing Markov Models
+\bibitem{2005markovstatistical} Bratko, A., Cormack, G.V., Filipic, B., Lynam, R., Zupan, B.: Spam Filtering Using Statistical Data Compression Models. In \emph{Proceedings of TREC}, 2005.
+\bibitem{2005markovcharacter} Bratko, A., Filipic, B.: Spam Filtering using Character-level Markov Models: Experiments for the TREC 2005 Spam Track. In \emph{Proceedings of TREC}, 2005.
+
+%References discussing N-grams
+\bibitem{2005ngram} Keselj, V., Milios, E., Tuttle, A., Wang, S., Zhang, R.: Spam Filtering using N-gram-based Techniques. In \emph{Proceedings of TREC}, 2005.
+\bibitem{2006osbflua} Assaz, F.: OSBF­Lua,­ A text classification module for Lua, The importance of the training method. In \emph{Proceedings of TREC}, 2006.
+\bibitem{2007rosvm} Sculley, D., Wachman, G.M.: Relaxed online SVMs in the TREC Spam 
+filtering track. In \emph{Sixteenth Text REtrieval Conference}, 2007.
+
+%More survey-like references
+\bibitem{2006survey} The CRM114 Team: Seven Hypothesis about Spam Filtering. In \emph{Proceedings of TREC}, 2006.
+\bibitem{2007systematic} Cormack, G.V.: Email Spam Filtering: A Systematic Review. In \emph{Foundations and Trends in Information Retrieval archive, Volume 1 Issue 4, April 2007}.
+\bibitem{2009elsevier} Guzella, T.S., Caminhas, W.M.: A review of machine learning approaches to Spam Filtering. Expert Systems with Applications, \emph{Elsevier, Volume 36, Issue 7, September 2009, Pages 10206–10222}
+
+
+%TREC Spam Track Overview
+\bibitem{2005overview} Cormack, G.V., Lynam, T., TREC 2005 Spam Track Overview. In \emph{Proceedings of TREC}, 2005.
+\bibitem{2006overview} Cormack, G.V.: TREC 2006 Spam Track Overview. In \emph{Proceedings of TREC}, 2006.
+\bibitem{2007overview} Cormack, G.V.: TREC 2007 Spam Track Overview. In \emph{Proceedings of TREC}, 2007.
+
+%Other references
+\bibitem{medlock2006} Medlock, B.: An adaptive, semi-structured language model approach to spam filtering on a new corpus. In \emph{Proceedings of the third conference on email and anti-spam.}
+\bibitem{2012english} Global Language Monitor: Number of Words in the English Language: 1,010,649.7 \url{http://www.languagemonitor.com/global-english/number-of-words-in-the-english-language-1008879/}
+\bibitem{teahan2000} Teahan, W. J.: Text classification and segmentation using minimum cross-entropy. In \emph{Proceedings of RIAO-00, 6th International Conference “Recherche d’Information Assistee par Ordinateur”}, 2000
+
+\end{thebibliography}
+
+\end{document}

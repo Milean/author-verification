@@ -13,7 +13,7 @@ public class BaselineNGram {
 		//TODO: remove this for command line launch;
 		if(args == null || args.length == 0){
 			args = new String[1];
-			args[0] = "text/training";
+			args[0] = "corpus/training";
 		}
 		
 		if(args.length == 0){
@@ -38,7 +38,7 @@ public class BaselineNGram {
 		//TODO: judgement authorship
 		
 		
-		String source = "text/src_text/michiel_swis_excerpt.txt";
+		String source = "corpus/test_own/michiel_swis_excerpt.txt";
 		FileReader fr = new FileReader(source);
 		BufferedReader br = new BufferedReader(fr);
 

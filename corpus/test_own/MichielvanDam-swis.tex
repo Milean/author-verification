@@ -1,0 +1,217 @@
+\documentclass{llncs}
+\usepackage{url}
+\usepackage{graphicx}
+
+% \section{This is a First-Order Title}
+% \subsection{This is a Second-Order Title}
+% \subsubsection{This is a Third-Order Title.}
+% \paragraph{This is a Fourth-Order Title.}
+
+\bibliographystyle{splncs}
+\DeclareGraphicsExtensions{.png}
+
+\begin{document}
+
+\title{Time on the Web}
+\subtitle{A survey of the underlying concepts}
+\author{Michiel van Dam}
+\institute{Seminar Web Information Systems, Delft Technical University
+\email{m.c.vandam@student.tudelft.nl}}
+
+\maketitle
+
+\begin{abstract}
+Our daily lives are shaped by being on time in meetings, reporting time spent for different tasks, and revising theories we held yesterday, based on new information we were presented with today. On the semantic web the information and relations are not much different, in the sense that many of them have an implicit temporal component. In the current semantic web not many relationships make this temporal component explicit. This paper has a threefold focus, the primary being explanation. The process of getting information about temporal components and reasoning with it is explained, leading to explanations of temporal information extraction, temporal knowledge representation and belief revision. Next to this the state of the art in each of these three areas is presented, and finally some possible paths for future research are presented.
+\end{abstract}
+
+%-----------------------------------------------------------------------
+
+\section{Introduction}
+\label{sec:introduction}
+
+% $\frac{\frac{1.2x}{3y}}{2}s$
+
+We live in a world shaped by time. Everyone is familiar with it, be it on the level of days and seasons, or minutes and milliseconds. We understand that travel takes time, that the rain will eventually stop falling and that some things happened yesterday. These concepts all come natural to us because we use them every day and are used to events having a starting and end point.\\
+\\
+In written text, time references don't always have to be included. The sentence ``Barack Obama was elected as President of the USA" points to the 2012 elections when used in november 2012, but is ambiguous to which election is being referred to when used a long time from now. In a sense, the context of which timeperiod is being referred to, can be lost.
+
+Another aspect of written text is the implicit dated nature of the information contained in it. Readers can assertain that the information was believed by the author to be true at the time of writing, but they can't assume that it was factually true, and even less that it still is. Information and beliefs may be revisited based on new research or arguments, causing the written text to become inaccurate.\\
+\\
+Finally a notion of time is already implicitly present in several statements. ``It's raining", ``Alice is employed by Google" and ``Bob lives in Delft" are good examples of this. The information contained in these sentences can and probably will change over the next hours or years, making representing a notion of time important when dealing with information.
+
+%------------------subsection
+
+\subsection{Time on the Web}
+On the web the need for representing time hardly differs from outside it. Information is still published at a certain date by a certain author, and can be outdated, become invalid, or need a time reference to make it meaningful. The way in which it differs is the accessibility of information. At one moment, users have access to millions of data sources, too much for them to browe or judge on validity themselves.\\
+\\
+The semantic web is a step forward in this regard, as it represents information in a way that lets computers determine how information relates to other information. Because of this, computers can traverse the web of semantic information, automatically drawing conclusions about information that can be deducted from other information that's already present. When time is factored in, it becomes a concern to automatically detect the timescope within wich a piece of information is valid, to be used in drawing the automated conclusions.\\
+\\
+Most of the data in the semantic web doesn't contain annotations about the scope of the information or relations. Moreover, as will also become apparent in section \ref{sec:static-representation}, the binary tuples that are commonly used for defining semantic relations, aren't designed to contain information on when the semantic relation holds, and when it doesn't. However, when such annotations exist in the semantic web, reasoning about it can remain a challenge. For example, when can we say that information becomes outdated in the semantic web? And when information is automatically deducted from existing information, does it become invalid when the underlying information expires?\\
+\\
+The previous paragraphs make it clear that there is a need for three fields of research to properly address this topic. In order of usage, these are:
+
+\begin{enumerate}
+\item Temporal Information Extraction
+\item Temporal Modeling
+\item Belief Revision
+\end{enumerate}
+
+The first field of research is needed to get information about the timespan in which information is valid from the information source itself, mostly when automatically giving semantic annotations to previously unstructured text sources, like news articles or reviews. The second field is needed for representing time and temporal relations on the semantic web, and can serve as a way for the first research to shape the results. The third field of research provides more high-level challenges for reasoning about information that has a temporal aspect, mostly concerning itself with consistency of the information and how to deduct new information or remove old information, based upon the temporal aspect.
+
+Together these three fields span different areas of computer science research: Information Retrieval, Semantic Web Modeling, and Artificial Intelligence. For comprehending and fully appreciating the challenges of using time in the semantic, each of these three fields is important and as such all three will be reflected upon in sections \ref{sec:static} and \ref{sec:streaming}.
+
+%------------------subsection
+
+\subsection{Static and streaming data}
+One more distinction can be made when discussing time on the web. The explanation until now assumed information to be available and static in the sense that it is slow to change, much like a news article on the web that will only change when it's conciously edited, which might happen a few times but isn't a continous process. However, some information is only useful in a stream of information, where each consecutive query produces a possible different result. Examples of this are the current stock prices, local weather conditions and traffic jams. Monitoring such streams will give information that changes every second or minute. The fields of research of the previous section still apply to this problem, but need to be taken in a new direction. Reasoning over changing information seems mostly suitable for data that changes in low volumes at low frequency, making streaming data pose new challenges.\\
+\\
+Having outlined the different aspects of time on the web this paper will try to give an overview of the current state of the art in the three identified fields of research, for both types of data. The remainder of this paper is structured as follows. First in section \ref{sec:static} the concept of time for static information is explored thoroughly in all three fields of research. Afterwards, section \ref{sec:streaming} discusses the differences for these fields when comparing streaming to static information. Then in section \ref{sec:discussion} remaining challenges concerning time on the semantic web will be discussed to propose a direction for future research. Finally section \ref{sec:conclusions} will give a short conclusion based on the presented material.
+
+%-----------------------------------------------------------------------
+
+\section{Static information}
+\label{sec:static}
+
+Traditionally on the web all published information was static. Websites that publish content, be it user-generated, content from news media or semantically annotated knowledge, have a moment the information is published, after which the information stays available for a non-trivial amount of time. Because users can copy what they find on the web, and because of efforts to preserve and archive the history of the web, information on the web has a chance of being saved and remaining accessible, even when the source has revoked the information or pages containing it.\\
+\\
+For dealing with time in static information on the web the three subjects already mentioned in section \ref{sec:introduction} will be discussed in more detail here.
+
+%------------------subsection
+
+\subsection{Temporal information extraction}
+\label{sec:tempinf}
+The amount of information on the web continues to grow at an impressive rate. While for automated reasoning it would be most useful for this information to be published in RDF or OWL with semantic annotations, reality is that most of the information sources only provide text documents. Annotated information will be called \emph{structured information} or \emph{text} throughout the remainder of this paper, as opposed to \emph{unstructured information} or \emph{unstructured text}.\\
+\\
+With unstructured text being more prevalent on the web than structured text, the majority of information needs to be retrieved automatically from such texts. Information Retrieval methods can perform just this task. Almost all methods have a focus on extracting facts from text and encoding them as binary relations, without regard for the temporal aspects. This results in information being represented as time invariant facts, when the information at hand doesn't necessarily have to be.\\
+\\
+Where the field of information retrieval already has proven methods for extracting meaning from text,\cite{Poelmans2012}\cite{Steichen2012} extracting time dependent relations next to the already retrieved information does not have such common solutions. To extract time dependent relations from unstructured text, several approaches have been suggested. These approaches focus on event extraction, where an event is defined as: ``\emph{something that occurs in a certain place at a certain time.}"\cite{Becker2010} This definition immediately provides a challenge, in the modeling of information that doesn't have a place or a clearly identified time. For instance the sentence ``The Higgs-Boson has never been detected" is clearly time dependent, but extracting an event from this is not easily done. A possible solution is to use the document creation or modification date to describe an atomic time interval, a chronon, at which the information at hand was valid. When more clearly identified events (``Today scientists at CERN may have found the Higgs-Boson") are generated, automated reasoning can determine the certainty of the first statement changes.\\
+\\
+For event extraction the unstructured text first needs to be parsed using a syntactic parser to detect semantic roles for verbs contained in the text.\cite{Ling2010} Then in the second step the temporal attributes of each sentence need to be classified, to properly detect types of events.\cite{Chambers2007} The \emph{tense} of the sentence is important to classify when the event is, the \emph{modality} describes whether it is something that happened, should happen, can happen or will not happen. And most important the event \emph{class} needs to be identified, whether it concerns an action, an occurrance, a perception or another class, to properly give an event a semantic annotation. Then in the third step the temporal relation between two events needs to be chosen. Representing these time intervals will more thoroughly be discussed in the next section.\\
+\\
+As is apparent from the above discussion, most information extraction solutions don't automatically reason about the time dependence of information, but using event extraction is a step in the right direction that can even be used to reason about information with a modification date.
+
+%------------------subsection
+
+\subsection{Semantic representation}
+\label{sec:static-representation}
+
+For the purpose of explaining the core concepts and issues, this section will assume the information retrieval step to be solved and to be accurate, and will only focus on the end result of that step: representing time. The question dominating this section will be: how can we store the temporal annotation in a way that can be processed automatically? First the concept of time intervals is discussed, after which existing solutions to represent time on the semantic web are presented.
+
+\subsubsection{Temporal Intervals}
+In the semantic web the relation between two pieces of information is usually indicated by tuples containing the subject, the relation, and the object. For instance \emph{employedBy(Alice, Google)} or more formally with the (fictious) namespaces from which the three parts of the tuple can be known, \emph{\{person:Alice work:employedBy company:Google\}}. Time can be represented in the same way, noting the temporal relation between events or two time dependent pieces of information. For this to work, each event or information already needs to have a temporal annotation of when it happened, or an interval when it was valid.\\
+\\
+For most publications the 13 time interval relations first published by Allen \cite{Allen1989} are used, as displayed in figure \ref{fig:intervals}. These intervals can be reasoned about and propagated, so if for example \emph{$A$ STARTS $B$}, and \emph{$B$ MEET $C$}, then it can be concluded that \emph{$A$ BEFORE $C$}.
+
+Defining such interval relations for static information as opposed to events can pose a challenge, because information usually has no defined end time, making it either a single point in time, leading to only \emph{BEFORE}, \emph{iBEFORE} and \emph{EQUAL} relations, or a timespan that has started at a defined point but doesn't end, excluding the \emph{BEFORE}, \emph{MEET}, \emph{OVERLAP}, \emph{DURING} and \emph{START} relations.
+
+\subsubsection{Temporal OWL}
+For representing temporal information in the Web Ontology Language, an important distinction needs to be made, between events and non-events. Information describing an event has a clear begin and end date, as it is already defined that events happen at a certain time or during a certain time interval. For non-events the begin and end are much less clear, as could already be deducted from the previous sections.
+
+Moreover, the semantic annotations themselves are also examples of the information under study. How can a semantic relation be modeled that is only true or false depending on when it's used? A problem here is that triples are used for representing the semantic information, and there's no way to give a subject, a relation and an object in a triple that also mentions the time interval during which the triple holds.\cite{Welty2006} A way in which this can be solved without resolving to quadruples instead of triples, would be to create a new object and triple for every semantic relation, creating a triple like: \emph{holds(aliceEmployedAtGoogle, 2010-2012)}. This obviously is not a preferred solution, because of the immense overhead incurred by it. However, it is a solution that adheres to the design principles of OWL.\\
+\\
+Several approaches have been taken to representing time in OWL. First off, Tao describes a way to encapsulate clinical narratives in RDF triples, using a \emph{DateTime} object for signaling the moment of an observation of symptom and a \emph{granularity} measure indicating the timespan within which this information was deemed to be accurate.\cite{Tao2010} For example taking antibiotics is modeled as something that happened in a timespan of 10 days, with a granularity (accuracy) of one day.
+
+\begin{figure}[top]
+\includegraphics[width=1.0\textwidth]{intervals}
+\caption{The possible 13 primitive time relationships between 2 intervals \cite{Pinhanez1997}}
+\label{fig:intervals}
+\end{figure}
+
+Batsakis gives an overview of ways to represent time in OWL, mentioning the restrictions above.\cite{Batsakis2010} When considering extending OWL syntax and semantics with the additional constructs that are needed, Batsakis discusses uses \emph{Temporal Description Logics}, extending \emph{Temporal RDF}, \emph{versioning}, and the \emph{4D-Fluent approach} which will be discussed in the next section. The main contribution of Batsakis is SOWL, an ontology model that can handle spatio-temporal information, as an extension of OWL, also providing a querying model and rules for automated reasoning in SOWL.
+
+Finally Milea et al. has designed the tOWL language, using a layered approach to express domains, temporal representations and timeslices.\cite{Milea2008}\cite{Milea2012} This approach is also based on extending description logics with a temporal representation, like the previous one. Using timeslices, which will also be discussed in the next section, the overhead that is inherently recurred from adding temporal values in the binary semantic relations, can be reduced but at the cost of increasing granularity.
+
+\subsubsection{Fluents}
+As already mentioned several times, OWL only allows binary relations, or 3-dimensional tuples, to indicate relations between two objects. In modeling time, objects and relationships are discovered that vary with time. The time the relationship holds needs to be defined explicitly, and as such requires another argument. These relationships that vary over time are called \emph{fluents}.\\
+\\
+After considering the standard OWL- and RDF-based approaches to represent fluents, Welty proposes a four-dimensional (4D) view to account for the fact that the same relation or entity can be different at other times.\cite{Welty2006} This view is based on the idea that all entities are perdurants, entities that have temporal parts that exist during the times the entity exists. This becomes a logical view when events and information are viewed on a universal scale; in the millions of years the universe exists, even the lifetime of a human being is an insignificant time interval, making all entities represented in the semantic web not much different. A single entity would in this 4D view be an entity that at each point in time can have other aspects. The entity ``Bob" could have a different height at time interval $t_1$ than at time interval $t_2$.\\
+\\
+This view on reality has the possibility for confusing what is exactly meant by sentences that previously offered no problem to process. The sentence ``Eve is flying to Amsterdam" would in the 4D view be expressed as ``A temporal part of Eve is flying to a temporal part of Amsterdam." However, this approach has a practical use: it can represents each entity at a specific point in time, without confusing which entity is being discussed. The earlier example of \emph{employedBy(Alice, Google)} would be expanded to \emph{employedBy(Alice@$t_1$, Google@$t_1$)}, to properly include the time intervals.\\
+\\
+Batsakis uses this view and expands upon it, defining new ontological classes \emph{TimeSlice} and \emph{TimeInterval}, with properties \emph{tsTimeSliceOf} and \emph{tsTimeInterval}.\cite{Batsakis2011} The idea behind this is that for every previously defined object \emph{X}, timesliced objects can be created with \emph{\{X@$t_1$ tsTimeSliceOf X\}} holding. For the time intervals the thirteen relations already seen in figure \ref{fig:intervals} can be used for defining temporal relations between two timeslices and reasoning about it.
+
+%------------------subsection
+
+\subsection{Belief revision}
+The third field of research needed for temporal information on the web is belief revision, which mostly concerns itself with Artificial Intelligence (AI) systems, and the traditional representation of knowledge in belief systems. This field is largely unexplored for the Semantic Web, so in this section the concepts that could also be applied to the semantic web will be discussed, to further understanding of the complexity of representing and dealing with time.\\
+\\
+Belief revision deals with inconsistencies in knowledge. Assume that you have the following knowledge rules.
+
+\begin{enumerate}
+\item Birds can fly
+\item Penguins are birds
+\item Penguins can not fly
+\end{enumerate}
+
+Suppose that it is a given that \emph{$X$ is a bird}, then the knowledge that \emph{$X$ can fly} would be automatically inferred. If at a later time the knowledge would be added that \emph{$X$ is a penguin}, the knowledge that \emph{$X$ can not fly} would be automatically inferred, leading to an inconsistent knowledge state.\\
+\\
+Roughly the same happens on the semantic web. Both RDF and OWL, which lie at the basis of the semantic web, define how to arrive at new information by reasoning from given information.\cite{Volz2005} This immediately includes the need for consistency maintenance, or belief revision, when conflicting information is created. It is important to note here that conflicting information in the semantic web seems \emph{prima facie} a case of incorrect information or incorrect semantic relations, as is assumed by Vilain when talking about constraints for temporal relations.\cite{Vilain1986} However, given that semantic relations can be fluent, it could have been the case of a semantic relation holding at the first moment when new information was inferred and not holding at the second moment when conflicting information was inferred. This forces traditional reasoning schemes for conflicting information in the semantic web to need rethinking.
+
+\subsubsection{The Frame Problem}
+The consistency issues mentioned above can be summarized in the \emph{frame problem}: During which timeframe does a certain piece of information hold. For information about actions and events this can already be modeled, concluding that after \emph{goTo(Alice, Kitchen)}, the information \emph{at(Alice, Kitchen)} must hold.\cite{Lifschitz2008} However, does \emph{position(Alice,sitting)} still hold after the first action? In this sense, the frame problem also asks how to represent everything that does \emph{not} change, when performing an action. Lifschitz gives several possibilities in the form of rules, such as ``\emph{what holds in a situation typically holds in the situation after an action was performed, unless it contradicts the description of the effects of the action.}"\\
+\\
+In related work, Gupta already proposed to revise beliefs by deleting the knowledge tuples that can be affected by an action, then rederiving some of them, insofar possible.\cite{Gupta1993} This is further enhanced by a counting algorithm that keeps track of the number of nonrecursive derivations, to aid the deleting and rederiving. This seems a solution on the side of caution, preferring deleting correctly inferred and still valid information over keeping outdated information.
+
+G\"ardenfors defines three types of belief revisions, happening at \emph{expansion}, \emph{revision} or \emph{contraction}.\cite{Gardenfors2003} Expansion happens when new beliefs are added to a system, revision happens when new inconsistent beliefs are added and several old beliefs are deleted to maintain consistency, and contraction happens when some belief is removed without adding any new facts. The last two revisions can cause additional problems, most having to do with information that was inferred from a belief that was removed. It can happen that the inferred information is still valid, while the reasons for assuming so are not. This leads to the following question. ``How to determine which information remains unaffected, when related information becomes outdated." For answering this methods from Lifschitz\cite{Lifschitz2008} or Gupta\cite{Gupta1993} can be used to return to a consistent knowledge state if needed.
+
+%-----------------------------------------------------------------------
+
+\section{Streaming information}
+\label{sec:streaming}
+
+As already briefly talked about in the introduction, not all information and beliefs are static in the sense that their value is preserved for some period of time. Information can also be streaming, meaning that it changes continually and that two consecutive queries on the same data source will give different results. Several good examples of this are click-streams, sensor networks, traffic monitoring, and the stock market, where stocks fluctuate by tiny amounts several times every second.\cite{Valle2009a} This last example clearly outlines the difference in streaming information when compared to static information. Not only is there new information every second, but the information from just a second ago has become irrelevant with the new information that is streaming in.\\
+\\
+These characteristics bring about new issues and goals for reasoning about time. First off, the time constraints are much tighter. In real time results or actions have to be calculated because with significant delay the chosen actions will not make sense anymore, given the new current state of the system. Secondly a distinction needs to be made between knowledge that does not change based upon rapidly changing observations, knowledge that does change periodically and knowledge that changes based on events following from the streaming data.\cite{Valle2009a} The distinction between knowledge and data is needed because the datastream is said to continuously change, while the beliefs a system has do not necessarily have to change as well.\\
+\\
+The three fields of research identified for time in the semantic web are also affected by stream reasoning, although the core of the explanation in the previous sections still holds. In the following paragraphs the main differences and additional challenges will be mentioned, when comparing streaming information to more static information.
+%------------------subsection
+
+\subsubsection{Temporal information extraction}
+
+First off, information retrieval is made easier, because streaming information is usually already encoded in a specified format, such as RSS feeds. Extracting temporal meaning is trivial here, because each data point only represents the current situation and doesn't hold over a longer timespan. Next to these two aspects, for reasoning about data streams this topic stays the same as already presented in section.\ref{sec:tempinf}
+
+%------------------subsection
+
+\subsubsection{Semantic representation}
+Valle proposes that data streams can always be considered \emph{RDF streams}. Two formats are given, being \emph{RDF Molecules stream} and \emph{RDF statements stream}. The first one is a bag of pairs containing a RDF molecule and a timestamp, the second one is a special case of the first where bag of pairs contains RDF statements instead of molecules.
+
+Reasoning about semantic relationships between molecules in this RDF data is tough, because of some difficulties.\cite{Valle2009} First off, every stream is observed through a window, limiting the timespan and possibly lacking information or containing conflicting information when two consecutive readings from one sensor are processed. The second difficulty is that while the stream information changes continuously, data might be correlated and merged with static information. When semantic relations are generated with static information, this creates data that must be carefully managed to account for the continuous changes in the object at one side of the semantic relation.
+
+%------------------subsection
+
+\subsubsection{Belief revision}
+Even more challenges arise for belief revision in stream reasoning. One is that the stream can only be accessed while it flows, making it impossible to reconstruct inferred information at a later time, for checking internal consistency. Finally inferring new information based upon streams is difficult because at every two moments two conflicting readings from sensors can be gathered, making it tough to reason about the current validity of either reading. Remaining questions are, for example, how to include real-time streaming information into querying languages for semantic information, such as SPARQL, and a vocabulary to give meaningful assertments on the future validity of information, when given a streaming information source.
+
+%-----------------------------------------------------------------------
+
+\section{Future Work}
+\label{sec:discussion}
+The previous sections have discussed the three fields of research needed for using time on the semantic web, giving more questions than answers in some regards. For retrieving temporal information, how can the temporal reach of a piece of information be determined? No clear distinction between events and other information is currently made, or rather, research focuses on events as temporal entities, ignoring other information as such. Also, while the question ``\emph{what information is contained in this sentence}" is commonly answered by information retrieval techniques, the question ``\emph{what information is still accurate in this sentence}" is left alone. Partly this is a question for Artificial Intelligence as well, when concerning belief revision. However, most AI systems accept new knowledge without question, unless it leads to inconsistencies. At the very least the following makes an interesting research question for future research:
+\begin{itemize}
+\item \emph{\textbf{RQ1:} How can be determined if information is still relevant, upon retrieving it?}
+\end{itemize}
+
+Dealing with information in the semantic representation of time also remains difficult, related to \emph{RQ1}. When information doesn't have a time interval during which it holds, can it be said to be true before or after other information? How can information without a clear end time for its validity be modeled in the temporal ontologies and the 4D fluents approach that were presented? It seems a good idea that information becomes less certain when older, and this can be summarized in the following question for future work.
+\begin{itemize}
+\item \emph{\textbf{RQ2:} How to represent temporal intervals only having a starting point, with decreasing chance of validity with progressing time?}
+\end{itemize}
+
+Finally belief revision is a concept well thought through for static information, but for stream reasoning and time-dependent information it's still lacking. The first question that remained after the explanation above was how to deal with information that was inferred based upon information that has become invalid since. Secondly in explaining streaming information the formalizations of querying language extensions and vocabularies for expressing aspects of the information stream are still lacking. While this might only be a matter of time making the following questions redundant, they nonetheless need answering to further this field of research.
+\begin{itemize}
+\item \emph{\textbf{RQ3:} How to determine which semantically inferred information remains unaffected, when related information becomes outdated?}
+\item \emph{\textbf{RQ4:} How to represent access to streaming data in querying languages for semantic information?}
+\item \emph{\textbf{RQ5:} How to assert the future validity of static data influenced by streaming information?}
+\end{itemize}
+
+%-----------------------------------------------------------------------
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+A comprehensive explanation of different aspects of time on the semantic web was presented, putting it together with research from the information retrieval and artificial intelligence fields to give a complete view of complexities when discussing this topic. While the research on representing temporal semantic relations is ongoing, the research on belief revision for temporal data and stream reasoning seems to only have started in recent years. For information retrieval however, no research is currently being done into representing time-dependent knowledge and determining future validity of semantic relations. The research questions provided in section \ref{sec:discussion} can provide directions for future research to address the identified problems, hopefully leading to a semantic web where time is just as much ubiquitous as in our everyday world.
+
+%-----------------------------------------------------------------------
+
+\bibliography{references}{}
+
+\end{document}
