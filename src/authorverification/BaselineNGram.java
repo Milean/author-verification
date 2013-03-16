@@ -32,10 +32,10 @@ public class BaselineNGram {
 			System.exit(0);
 		}
 		
-		baseNGrams(corpus, 1);
-		baseNGrams(corpus, 2);
-		baseNGrams(corpus, 3);
-		baseNGrams(corpus, 4);
+		
+		for(int i = 1; i<=100; i++){
+			baseNGrams(corpus, 6, i*5);
+		}
 	}
 	
 
@@ -45,19 +45,40 @@ public class BaselineNGram {
 	 * Creates N-gram profiles for a known author, and compares this against an unknown document.
 	 * Makes a decision whether or not the document belongs to the same author.
 	 * 
+	 * Chooses a default amount of n*n*25
+	 * 
 	 * @param corpus The directory with all test instances
 	 * @param n The fixed length of the n-grams that will be used
+	 * 
 	 * @throws IOException
 	 */
 	private static void baseNGrams(File corpus, int n) throws IOException{
+		baseNGrams(corpus,n,n*n*25);
+	}
+	
+	/**
+	 * Baseline N-gram implementation
+	 * 
+	 * Creates N-gram profiles for a known author, and compares this against an unknown document.
+	 * Makes a decision whether or not the document belongs to the same author.
+	 * 
+	 * @param corpus The directory with all test instances
+	 * @param n The fixed length of the n-grams that will be used
+	 * @param amount The amount of most frequent N-grams that will be used for the profiles.
+	 * 
+	 * @throws IOException
+	 */
+	private static void baseNGrams(File corpus, int n, int amount) throws IOException{
 		
 		File[] instances = corpus.listFiles();
-		HashMap<String, Double> distances = new HashMap<String, Double>();
-		
-		double average = 0d;
+		HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
+		HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
+		HashMap<String, Double> distancesGreek = new HashMap<String, Double>();
 		
 		for(File instance : instances){
 			if(instance.isDirectory()){
+				
+				String name = instance.getName();
 				
 				File[] authorfiles = instance.listFiles();
 				
@@ -81,36 +102,57 @@ public class BaselineNGram {
 					}
 				}
 				
-				knownAuthor = Tools.keepHighestN(knownAuthor, n*n*25, false);
-				unknown = Tools.keepHighestN(unknown, n*n*25, false);
+				knownAuthor = Tools.keepHighestN(knownAuthor, amount, false);
+				unknown = Tools.keepHighestN(unknown, amount, false);
 
 				knownAuthor = Tools.normalizeNGrams(knownAuthor);
 				unknown = Tools.normalizeNGrams(unknown);
 				
 				double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
-				distances.put(instance.getName(), distance);
-				average += distance;
+				
+				if(name.startsWith("EN")){
+					distancesEnglish.put(name, distance);
+				}
+				else if(name.startsWith("SP")){
+					distancesSpanish.put(name, distance);
+				}
+				else if(name.startsWith("GR")){
+					distancesGreek.put(name, distance);
+				}
+				else{
+					System.out.println("ERROR, unrecognized instance language: "+name);
+				}
 			}
+		}
+		
+		double accEn = AccuracyReview.getAccuracy(getJudgements(distancesEnglish));
+		double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
+		double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
+
+		System.out.println(""+n+"\t"+amount+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+	}
+	
+	private static HashMap<String, Boolean> getJudgements(HashMap<String, Double> distances){
+		HashMap<String, Boolean> judgements = new HashMap<String, Boolean>();
+		
+		double average = 0d;
+		
+		for(String instance : distances.keySet()){
+			average += distances.get(instance);
 		}
 		
 		average = average / ((double)distances.size());
-		
-//		System.out.println("Average is: "+average);
 
-		AccuracyReview.reset();
-		
 		for(String instance : distances.keySet()){
 			if(distances.get(instance) < average){
-				AccuracyReview.addJudgement(instance, true);
+				judgements.put(instance, true);
 			}
 			else{
-				AccuracyReview.addJudgement(instance, false);
+				judgements.put(instance, false);
 			}
-		}
-
-		System.out.println("Accuracy reached with "+n+"-grams: "+AccuracyReview.accuracy());
-
-		AccuracyReview.reset();
+		}		
+		
+		return judgements;
 	}
 	
 	public static double compare(String[] authorDocs, String unknownDoc){
