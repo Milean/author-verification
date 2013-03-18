@@ -81,6 +81,7 @@ public class Tools {
 			ngrams = new HashMap<String, Double>();
 		}
 		
+		@SuppressWarnings("resource")
 		NGramTokenizer ngramTok = new NGramTokenizer(reader, n, n);
 		CharTermAttribute terms = ngramTok.addAttribute(CharTermAttribute.class);
 		while(ngramTok.incrementToken()){

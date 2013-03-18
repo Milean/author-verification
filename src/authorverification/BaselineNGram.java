@@ -3,18 +3,14 @@ package authorverification;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 public class BaselineNGram {
 	public static void main(String[] args) throws IOException{
 
-		//TODO: remove this for command line launch;
+		//TODO: remove next four lines for command line launch
 		if(args == null || args.length == 0){
 			args = new String[1];
 			args[0] = "corpus/training";
@@ -45,30 +41,13 @@ public class BaselineNGram {
 	 * Creates N-gram profiles for a known author, and compares this against an unknown document.
 	 * Makes a decision whether or not the document belongs to the same author.
 	 * 
-	 * Chooses a default profile size of n*n*25
-	 * 
 	 * @param corpus The directory with all test instances
 	 * @param n The fixed length of the n-grams that will be used
+	 * @param profileSize The amount of most frequent N-grams that will be used for the profiles.
 	 * 
 	 * @throws IOException
 	 */
-	private static void baseNGrams(File corpus, int n) throws IOException{
-		baseNGrams(corpus,n,n*n*25);
-	}
-	
-	/**
-	 * Baseline N-gram implementation
-	 * 
-	 * Creates N-gram profiles for a known author, and compares this against an unknown document.
-	 * Makes a decision whether or not the document belongs to the same author.
-	 * 
-	 * @param corpus The directory with all test instances
-	 * @param n The fixed length of the n-grams that will be used
-	 * @param amount The amount of most frequent N-grams that will be used for the profiles.
-	 * 
-	 * @throws IOException
-	 */
-	private static void baseNGrams(File corpus, int n, int amount) throws IOException{
+	private static void baseNGrams(File corpus, int n, int profileSize) throws IOException{
 		
 		File[] instances = corpus.listFiles();
 		HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
@@ -109,8 +88,8 @@ public class BaselineNGram {
 //					System.out.println("Known Author n-grams: "+Tools.toString(knownAuthor));
 //				}
 				
-				knownAuthor = Tools.keepHighestN(knownAuthor, amount, true);
-				unknown = Tools.keepHighestN(unknown, amount, true);
+				knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
+				unknown = Tools.keepHighestN(unknown, profileSize, true);
 
 //				if(name.startsWith("TEST")){
 //					System.out.println("Highest frequency: "+Tools.toString(knownAuthor));
@@ -148,7 +127,7 @@ public class BaselineNGram {
 		double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
 		double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
 
-		System.out.println(""+n+"\t"+amount+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+		System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
 	}
 	
 	private static HashMap<String, Boolean> getJudgements(HashMap<String, Double> distances){

@@ -31,6 +31,7 @@ public class LowercaseReader extends BufferedReader{
 		return super.readLine().toLowerCase();
 	}
 	
+	@Override
 	public int read(char[] cbuf) throws IOException{
 		int result = super.read(cbuf);
 		
