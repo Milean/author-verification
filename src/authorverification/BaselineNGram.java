@@ -45,7 +45,7 @@ public class BaselineNGram {
 	 * Creates N-gram profiles for a known author, and compares this against an unknown document.
 	 * Makes a decision whether or not the document belongs to the same author.
 	 * 
-	 * Chooses a default amount of n*n*25
+	 * Chooses a default profile size of n*n*25
 	 * 
 	 * @param corpus The directory with all test instances
 	 * @param n The fixed length of the n-grams that will be used
@@ -87,11 +87,13 @@ public class BaselineNGram {
 				
 				for(File f : authorfiles){
 					if(f.getName().startsWith("known")){
+						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 						BufferedReader reader = new BufferedReader(new FileReader(f));
 						knownAuthor = Tools.addCharacterNGrams(reader, n, knownAuthor);
 						reader.close();
 					}
 					else if(f.getName().startsWith("unknown")){
+						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 						BufferedReader reader = new BufferedReader(new FileReader(f));
 						unknown = Tools.addCharacterNGrams(reader, n, unknown);
 						reader.close();
@@ -99,16 +101,29 @@ public class BaselineNGram {
 					else{
 						//Error: should be no other files
 						System.err.println("ERROR: Unexpected file: "+f.getAbsolutePath());
+						System.exit(1);
 					}
 				}
 				
-				knownAuthor = Tools.keepHighestN(knownAuthor, amount, false);
-				unknown = Tools.keepHighestN(unknown, amount, false);
+//				if(name.startsWith("TEST")){
+//					System.out.println("Known Author n-grams: "+Tools.toString(knownAuthor));
+//				}
+				
+				knownAuthor = Tools.keepHighestN(knownAuthor, amount, true);
+				unknown = Tools.keepHighestN(unknown, amount, true);
+
+//				if(name.startsWith("TEST")){
+//					System.out.println("Highest frequency: "+Tools.toString(knownAuthor));
+//				}
 
 				knownAuthor = Tools.normalizeNGrams(knownAuthor);
 				unknown = Tools.normalizeNGrams(unknown);
 				
 				double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
+
+//				if(name.startsWith("TEST")){
+//					System.out.println("Distance: "+distance);
+//				}
 				
 				if(name.startsWith("EN")){
 					distancesEnglish.put(name, distance);
@@ -119,8 +134,12 @@ public class BaselineNGram {
 				else if(name.startsWith("GR")){
 					distancesGreek.put(name, distance);
 				}
+				else if(name.startsWith("TEST")){
+					//do nothing
+				}
 				else{
 					System.out.println("ERROR, unrecognized instance language: "+name);
+					System.exit(1);
 				}
 			}
 		}
