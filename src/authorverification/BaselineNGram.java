@@ -5,11 +5,23 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.HashMap;
 
 public class BaselineNGram {
 	public static void main(String[] args) throws IOException{
 
+//		StringReader test = new StringReader("De kat krabt de krullen van de trap");
+//		NoFormatReader reader = new NoFormatReader(test);
+//		char[] res = new char[1024];
+//		int amount = reader.read(res);
+//		System.out.println(""+amount+" characters read, in an array of size "+res.length);
+//		
+//		char[] second = Tools.removeAccents(res);
+//		
+//		System.exit(0);
+		
+		
 		//TODO: remove next four lines for command line launch
 		if(args == null || args.length == 0){
 			args = new String[1];
@@ -30,7 +42,7 @@ public class BaselineNGram {
 		
 		
 		for(int i = 1; i<=100; i++){
-			baseNGrams(corpus, 6, i*5);
+			baseNGrams(corpus, 1, i);
 		}
 	}
 	
@@ -66,14 +78,18 @@ public class BaselineNGram {
 				
 				for(File f : authorfiles){
 					if(f.getName().startsWith("known")){
+						BasicAlphabetReader reader = new BasicAlphabetReader(new FileReader(f));
+						//NoFormatReader reader = new NoFormatReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
-						BufferedReader reader = new BufferedReader(new FileReader(f));
+						//BufferedReader reader = new BufferedReader(new FileReader(f));
 						knownAuthor = Tools.addCharacterNGrams(reader, n, knownAuthor);
 						reader.close();
 					}
 					else if(f.getName().startsWith("unknown")){
+						BasicAlphabetReader reader = new BasicAlphabetReader(new FileReader(f));
+						//NoFormatReader reader = new NoFormatReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
-						BufferedReader reader = new BufferedReader(new FileReader(f));
+						//BufferedReader reader = new BufferedReader(new FileReader(f));
 						unknown = Tools.addCharacterNGrams(reader, n, unknown);
 						reader.close();
 					}
@@ -84,15 +100,15 @@ public class BaselineNGram {
 					}
 				}
 				
-//				if(name.startsWith("TEST")){
-//					System.out.println("Known Author n-grams: "+Tools.toString(knownAuthor));
+//				if(name.startsWith("SP")){
+//					System.out.println(knownAuthor.size()+" known Author "+n+"-grams in "+name+": "/*+"\n"+Tools.toString(knownAuthor)*/);
 //				}
 				
 				knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
 				unknown = Tools.keepHighestN(unknown, profileSize, true);
 
-//				if(name.startsWith("TEST")){
-//					System.out.println("Highest frequency: "+Tools.toString(knownAuthor));
+//				if(name.startsWith("SP")){
+//					System.out.println("Highest frequency "+n+"-grams in "+name+": \n"+Tools.toString(knownAuthor));
 //				}
 
 				knownAuthor = Tools.normalizeNGrams(knownAuthor);

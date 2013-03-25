@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -24,6 +26,14 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
  */
 public class Tools {
 
+	public static char[] removeAccents(char[] text) {
+		if(text == null) 
+			return null;
+		
+		String normalized = Normalizer.normalize(java.nio.CharBuffer.wrap(text), Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+		return normalized.toCharArray();
+	}
+	
 	/**
 	 * Returns a map of character n-grams contained in this String, with a count how often each n-gram occurs.
 	 * 
