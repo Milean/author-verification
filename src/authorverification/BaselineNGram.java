@@ -40,10 +40,8 @@ public class BaselineNGram {
 			System.exit(0);
 		}
 		
-		
-		for(int i = 1; i<=100; i++){
-			baseNGrams(corpus, 1, i);
-		}
+		//baseNGrams(corpus, N, minProfileSize, maxProfileSize, increments)
+		baseNGrams(corpus, 9, 10, 1000, 10);
 	}
 	
 
@@ -59,12 +57,12 @@ public class BaselineNGram {
 	 * 
 	 * @throws IOException
 	 */
-	private static void baseNGrams(File corpus, int n, int profileSize) throws IOException{
+	private static void baseNGrams(File corpus, int n, int minProfileSize, int maxProfileSize, int increment) throws IOException{
 		
 		File[] instances = corpus.listFiles();
-		HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
-		HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
-		HashMap<String, Double> distancesGreek = new HashMap<String, Double>();
+
+		HashMap<String, HashMap<String, Double>> knownAuthorForInstances = new HashMap<String, HashMap<String, Double>>();
+		HashMap<String, HashMap<String, Double>> unknownForInstances = new HashMap<String, HashMap<String, Double>>();
 		
 		for(File instance : instances){
 			if(instance.isDirectory()){
@@ -78,16 +76,20 @@ public class BaselineNGram {
 				
 				for(File f : authorfiles){
 					if(f.getName().startsWith("known")){
-						BasicAlphabetReader reader = new BasicAlphabetReader(new FileReader(f));
-						//NoFormatReader reader = new NoFormatReader(new FileReader(f));
+						//BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
+						BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
+						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
+						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 						//BufferedReader reader = new BufferedReader(new FileReader(f));
 						knownAuthor = Tools.addCharacterNGrams(reader, n, knownAuthor);
 						reader.close();
 					}
 					else if(f.getName().startsWith("unknown")){
-						BasicAlphabetReader reader = new BasicAlphabetReader(new FileReader(f));
-						//NoFormatReader reader = new NoFormatReader(new FileReader(f));
+						//BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
+						BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
+						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
+						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 						//BufferedReader reader = new BufferedReader(new FileReader(f));
 						unknown = Tools.addCharacterNGrams(reader, n, unknown);
@@ -100,50 +102,87 @@ public class BaselineNGram {
 					}
 				}
 				
-//				if(name.startsWith("SP")){
-//					System.out.println(knownAuthor.size()+" known Author "+n+"-grams in "+name+": "/*+"\n"+Tools.toString(knownAuthor)*/);
-//				}
+				knownAuthorForInstances.put(name, knownAuthor);
+				unknownForInstances.put(name, unknown);
 				
-				knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
-				unknown = Tools.keepHighestN(unknown, profileSize, true);
-
-//				if(name.startsWith("SP")){
-//					System.out.println("Highest frequency "+n+"-grams in "+name+": \n"+Tools.toString(knownAuthor));
+//				if(name.startsWith("GR01")){
+//					System.out.println(knownAuthor.size()+" known Author "+n+"-grams in "+name+": "+"\n"+Tools.toString(knownAuthor));
 //				}
 
-				knownAuthor = Tools.normalizeNGrams(knownAuthor);
-				unknown = Tools.normalizeNGrams(unknown);
+			}
+		}
 				
-				double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
-
-//				if(name.startsWith("TEST")){
-//					System.out.println("Distance: "+distance);
-//				}
-				
-				if(name.startsWith("EN")){
-					distancesEnglish.put(name, distance);
-				}
-				else if(name.startsWith("SP")){
-					distancesSpanish.put(name, distance);
-				}
-				else if(name.startsWith("GR")){
-					distancesGreek.put(name, distance);
-				}
-				else if(name.startsWith("TEST")){
-					//do nothing
-				}
-				else{
-					System.out.println("ERROR, unrecognized instance language: "+name);
-					System.exit(1);
-				}
+		System.out.println("\nKNOWN AUTHOR: ");
+		for(File instance : instances){
+			if(instance.isDirectory()){
+				String name = instance.getName();
+				System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
+			}
+		}
+		System.out.println("\nUNKNOWN: ");
+		for(File instance : instances){
+			if(instance.isDirectory()){
+				String name = instance.getName();
+				System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
 			}
 		}
 		
-		double accEn = AccuracyReview.getAccuracy(getJudgements(distancesEnglish));
-		double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
-		double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
+		for(int profileSize = minProfileSize; profileSize <= maxProfileSize; profileSize+=increment){
 
-		System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+			HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
+			HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
+			HashMap<String, Double> distancesGreek = new HashMap<String, Double>();
+			
+			for(File instance : instances){
+				if(instance.isDirectory()){
+					
+					String name = instance.getName();
+					
+					HashMap<String, Double> knownAuthor = knownAuthorForInstances.get(name);
+					HashMap<String, Double> unknown = unknownForInstances.get(name);
+					
+						
+					knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
+					unknown = Tools.keepHighestN(unknown, profileSize, true);
+	
+	//				if(name.startsWith("SP")){
+	//					System.out.println("Highest frequency "+n+"-grams in "+name+": \n"+Tools.toString(knownAuthor));
+	//				}
+	
+					knownAuthor = Tools.normalizeNGrams(knownAuthor);
+					unknown = Tools.normalizeNGrams(unknown);
+					
+					double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
+	
+	//				if(name.startsWith("TEST")){
+	//					System.out.println("Distance: "+distance);
+	//				}
+					
+					if(name.startsWith("EN")){
+						distancesEnglish.put(name, distance);
+					}
+					else if(name.startsWith("SP")){
+						distancesSpanish.put(name, distance);
+					}
+					else if(name.startsWith("GR")){
+						distancesGreek.put(name, distance);
+					}
+					else if(name.startsWith("TEST")){
+						//do nothing
+					}
+					else{
+						System.out.println("ERROR, unrecognized instance language: "+name);
+						System.exit(1);
+					}
+				}
+			}
+			
+			double accEn = AccuracyReview.getAccuracy(getJudgements(distancesEnglish));
+			double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
+			double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
+	
+			System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+		}
 	}
 	
 	private static HashMap<String, Boolean> getJudgements(HashMap<String, Double> distances){

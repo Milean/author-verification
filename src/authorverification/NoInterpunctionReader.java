@@ -3,16 +3,23 @@ package authorverification;
 import java.io.IOException;
 import java.io.Reader;
 
-public class NoFormatReader extends LowercaseReader{
+/**
+ * Removes interpunction.
+ * Keeps spaces, digits and letter-symbols.
+ * 
+ * @author af13003
+ *
+ */
+public class NoInterpunctionReader extends LowercaseReader{
 
-	public NoFormatReader(Reader arg0) {
+	public NoInterpunctionReader(Reader arg0) {
 		super(arg0);
 	}
 	
 	@Override
 	public int read() throws IOException{
 		int ch = super.read();
-		while(!Character.isLetter((char)ch)){
+		while(ch != ' ' && !Character.isDigit((char)ch) && !Character.isLetter((char)ch)){
 			if(ch == -1){
 				return -1;
 			}

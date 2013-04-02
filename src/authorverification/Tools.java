@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -91,24 +92,35 @@ public class Tools {
 			ngrams = new HashMap<String, Double>();
 		}
 		
-		@SuppressWarnings("resource")
-		NGramTokenizer ngramTok = new NGramTokenizer(reader, n, n);
-		CharTermAttribute terms = ngramTok.addAttribute(CharTermAttribute.class);
-		while(ngramTok.incrementToken()){
-			String ngram = terms.toString();
-			
+		StringBuffer buffer = new StringBuffer(35000);
+		
+		int pos = 0;
+		int token = reader.read();
+		while(pos < n-1){
+			buffer.append((char)token);
+			token = reader.read();
+			pos++;
+		}
+
+		while(token != -1){
+			buffer.append((char)token);
+			token = reader.read();
+			pos++;
+
+			String ngram = buffer.substring(pos-n, pos);
 			if(!ngrams.containsKey(ngram)){
 				ngrams.put(ngram, 0d);
 			}
 			
 			ngrams.put(ngram, ngrams.get(ngram)+1d);
+
+			if(ngram.length() != n){
+				System.out.println("ERROR: ngram of unequal size!");
+			}
 		}
 		
 		return ngrams;
-
 	}
-	
-
 	
 	public static HashMap<String, Double> normalizeNGrams(Map<String, Double> ngrams){
 		HashMap<String, Double> result = new HashMap<String, Double>();
@@ -219,7 +231,7 @@ public class Tools {
 	 * Returns a new Map containing only the key-value pairs where the key is not contained in the filter Set.
 	 * 
 	 * @param data The old Map that will be used as base data for the filtered Map.
-	 * @param filter The list of keys that will be removed.
+	 * @param n The amount of keys that will be kept.
 	 * @param including Toggle to true to add all key-value pairs at the cut-off value as well, or false to 
 	 * only include values higher than the cutoff value (prefers a smaller or a bigger profile)
 	 *  
@@ -248,6 +260,73 @@ public class Tools {
 		return result;
 	}
 	
+	/**
+	 * Gives statistics on the values in this N-Gram map.
+	 * 
+	 * @param data The old Map that will be used for statistics.
+	 *  
+	 * @return A String, containing several lines of information about these N-grams. 
+	 */
+	public static String statistics(Map<String, Double> data, boolean extensive, boolean cumulative){
+		String result = "";
+		
+		ArrayList<Double> valueList = new ArrayList<Double>(data.values());
+		Collections.sort(valueList);
+		
+		double currentAmount = 0d;
+		if(valueList.size()>0){
+			currentAmount = valueList.get(valueList.size()-1).doubleValue();
+		}
+		
+		double highest = currentAmount;
+		
+		int count = 0;
+		for(int i = valueList.size()-1; i>=0; i--){
+			if(valueList.get(i).doubleValue() == currentAmount){
+				count++;
+			}
+			else if(valueList.get(i).doubleValue() > currentAmount){
+				System.out.println("ERROR (Tools.statistics): increasing value after sorting!");
+			}
+			else{
+				if(extensive){
+					result += ""+count+" n-grams that occur "+currentAmount+" times"+ (cumulative ? "or more.\n" : ".\n");
+				}
+				else{
+					result += "\t"+count;
+				}
+				currentAmount = valueList.get(i).doubleValue();
+				
+				if(cumulative){
+					count++;
+				}
+				else{
+					count = 1;
+				}
+			}
+		}
+
+		if(extensive){
+			result += ""+count+" n-grams that occur "+currentAmount+" times"+ (cumulative ? "or more.\n" : ".\n");
+		}
+		else{
+			result += "\t"+count;
+		}
+		
+		if(extensive){
+			result += "The most frequent n-grams are: ";
+			
+			for(String s : data.keySet()){
+				if(data.get(s) == highest){
+					result += s+", ";
+				}
+			}
+			
+			result += "and the total amount of n-grams is "+data.size()+"\n";
+		}
+		
+		return result;
+	}
 	/**
 	 * Calculates and returns the cosine similarity of two vectors expressed as key-value pairs.
 	 * 

@@ -1,12 +1,29 @@
 package authorverification;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-public class BasicAlphabetReader extends NoFormatReader{
+public class BasicAlphabetReader extends BufferedReader{
 
 	public BasicAlphabetReader(Reader arg0) {
 		super(arg0);
+	}
+	
+	@Override
+	public int read() throws IOException{
+		int ch = super.read();
+		
+		if(ch == -1){
+			return -1;
+		}
+		
+		char[] cbuf = new char[1];
+		cbuf[0] = (char)ch;
+		cbuf = Tools.removeAccents(cbuf);
+				
+		return (int)cbuf[0];
+
 	}
 	
 	@Override
@@ -15,7 +32,7 @@ public class BasicAlphabetReader extends NoFormatReader{
 			return 0;
 		}
 		
-		int ch = read();
+		int ch = super.read();
 		if(ch == -1){
 			return -1;
 		}
