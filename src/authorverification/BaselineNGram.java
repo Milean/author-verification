@@ -26,6 +26,7 @@ public class BaselineNGram {
 		if(args == null || args.length == 0){
 			args = new String[1];
 			args[0] = "corpus/training";
+//			args[0] = "corpus/gutenberg_cases";
 		}
 		
 		if(args.length == 0){
@@ -41,7 +42,9 @@ public class BaselineNGram {
 		}
 		
 		//baseNGrams(corpus, N, minProfileSize, maxProfileSize, increments)
-		baseNGrams(corpus, 9, 10, 1000, 10);
+		for(int n = 1; n<7; n++){
+			baseNGrams(corpus, n, 5, 500, 5);
+		}
 	}
 	
 
@@ -58,6 +61,8 @@ public class BaselineNGram {
 	 * @throws IOException
 	 */
 	private static void baseNGrams(File corpus, int n, int minProfileSize, int maxProfileSize, int increment) throws IOException{
+		
+		HashMap<String, Double> ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
 		
 		File[] instances = corpus.listFiles();
 
@@ -76,8 +81,8 @@ public class BaselineNGram {
 				
 				for(File f : authorfiles){
 					if(f.getName().startsWith("known")){
-						//BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
-						BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
+						BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
+						//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
 						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
 						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
@@ -86,8 +91,8 @@ public class BaselineNGram {
 						reader.close();
 					}
 					else if(f.getName().startsWith("unknown")){
-						//BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
-						BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
+						BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
+						//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
 						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
 						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
@@ -112,18 +117,18 @@ public class BaselineNGram {
 			}
 		}
 				
-		System.out.println("\nKNOWN AUTHOR: ");
+	//	System.out.println("\nKNOWN AUTHOR: ");
 		for(File instance : instances){
 			if(instance.isDirectory()){
 				String name = instance.getName();
-				System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
+	//			System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
 			}
 		}
-		System.out.println("\nUNKNOWN: ");
+	//	System.out.println("\nUNKNOWN: ");
 		for(File instance : instances){
 			if(instance.isDirectory()){
 				String name = instance.getName();
-				System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
+	//			System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
 			}
 		}
 		
@@ -141,9 +146,10 @@ public class BaselineNGram {
 					HashMap<String, Double> knownAuthor = knownAuthorForInstances.get(name);
 					HashMap<String, Double> unknown = unknownForInstances.get(name);
 					
-						
+					//knownAuthor = Tools.keepAllContaining(knownAuthor, ngramFilter.keySet());
+					
 					knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
-					unknown = Tools.keepHighestN(unknown, profileSize, true);
+					//unknown = Tools.keepHighestN(unknown, profileSize, true);
 	
 	//				if(name.startsWith("SP")){
 	//					System.out.println("Highest frequency "+n+"-grams in "+name+": \n"+Tools.toString(knownAuthor));
@@ -158,6 +164,7 @@ public class BaselineNGram {
 	//					System.out.println("Distance: "+distance);
 	//				}
 					
+	//				System.out.println(""+distance);
 					if(name.startsWith("EN")){
 						distancesEnglish.put(name, distance);
 					}

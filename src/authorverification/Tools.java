@@ -1,7 +1,9 @@
 package authorverification;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -17,6 +19,8 @@ import java.text.Normalizer.Form;
 
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+
+import com.thoughtworks.xstream.XStream;
 
 /**
  * This class will contain commonly used tools for Information Retrieval 
@@ -420,5 +424,38 @@ public class Tools {
 		
 		return result;
 	}
+	
+	public static void saveNGrams(File to, HashMap<String, Double> ngrams) {
+		XStream xstream = new XStream();
+		xstream.setMode(XStream.ID_REFERENCES);
+		String xml = xstream.toXML(ngrams);
+		try {
+			FileWriter fw = new FileWriter(to);
+			fw.write(xml);
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static HashMap<String, Double> loadNGrams(File file) {
+		XStream xstream = new XStream();
+		xstream.setMode(XStream.ID_REFERENCES);
+		HashMap<String, Double> ngrams = null;
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			ngrams = (HashMap<String, Double>) xstream.fromXML(fis);
+			fis.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+		return ngrams;
+	}
+	
 	
 }

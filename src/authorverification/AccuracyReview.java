@@ -8,15 +8,26 @@ public class AccuracyReview {
 	private int correct;
 	
 	private final String[] positives = {	
-											"EN04","EN11","EN18","EN19","EN23","GR02","GR04","GR06",
-											"GR08","GR10","GR12","GR14","GR16","GR18","GR20","SP02",
-											"SP05","SP10"
+											"EN004","EN011","EN018","EN019","EN023",
+											"EN100","EN101","EN102","EN103","EN104","EN105","EN106","EN107","EN108","EN109",
+											"EN110","EN111","EN112","EN113","EN114","EN115","EN116","EN117","EN118","EN119",
+											"EN120","EN121","EN122","EN123","EN124","EN125","EN126","EN127","EN128","EN129",
+											
+											"GR02","GR04","GR06","GR08","GR10","GR12","GR14","GR16","GR18","GR20",
+											
+											"SP02","SP05","SP10"
 										};
 
 	private final String[] negatives = {
-											"EN07","EN13","EN21","EN24","EN30","GR01","GR03","GR05",
-											"GR07","GR09","GR11","GR13","GR15","GR17","GR19","SP03",
-											"SP09"
+											"EN007","EN013","EN021","EN024","EN030",
+											"EN150","EN151","EN152","EN153","EN154","EN155","EN156","EN157","EN158","EN159",
+											"EN160","EN161","EN162","EN163","EN164","EN165","EN166","EN167","EN168","EN169",
+											"EN170","EN171","EN172","EN173","EN174","EN175","EN176","EN177","EN178","EN179",
+											"EN180","EN181","EN182","EN183","EN184","EN185","EN186","EN187","EN188","EN189",
+											
+											"GR01","GR03","GR05","GR07","GR09","GR11","GR13","GR15","GR17","GR19",
+											
+											"SP03","SP09"
 										};
 	
 	public AccuracyReview(){
