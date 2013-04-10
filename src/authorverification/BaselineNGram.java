@@ -85,6 +85,7 @@ public class BaselineNGram {
 						//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
 						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f))));
 						//StaticNumberReader reader = new StaticNumberReader(new LowercaseReader(new FileReader(f)));
+						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
 						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 						//BufferedReader reader = new BufferedReader(new FileReader(f));
@@ -96,6 +97,7 @@ public class BaselineNGram {
 						//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
 						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f))));
 						//StaticNumberReader reader = new StaticNumberReader(new LowercaseReader(new FileReader(f)));
+						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
 						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 						//BufferedReader reader = new BufferedReader(new FileReader(f));
