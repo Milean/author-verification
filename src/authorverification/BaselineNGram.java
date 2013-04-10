@@ -4,6 +4,7 @@ package authorverification;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class BaselineNGram {
@@ -39,10 +40,14 @@ public class BaselineNGram {
 			System.exit(0);
 		}
 		
+		ArrayList<AccuracyResult> accuracies = new ArrayList<AccuracyResult>();
+
 		//baseNGrams(corpus, N, minProfileSize, maxProfileSize, increments)
 		for(int n = 1; n<7; n++){
-			baseNGrams(corpus, n, 5, 500, 5);
+			accuracies.addAll(baseNGrams(corpus, n, 5, 500, 5));
 		}
+		
+		Tools.printGroupedAccuracyForLanguage(accuracies, "EN");
 	}
 	
 
@@ -58,7 +63,7 @@ public class BaselineNGram {
 	 * 
 	 * @throws IOException
 	 */
-	private static void baseNGrams(File corpus, int n, int minProfileSize, int maxProfileSize, int increment) throws IOException{
+	private static ArrayList<AccuracyResult> baseNGrams(File corpus, int n, int minProfileSize, int maxProfileSize, int increment) throws IOException{
 		
 		File[] instances = corpus.listFiles();
 
@@ -106,24 +111,28 @@ public class BaselineNGram {
 			}
 		}
 		
-		printProfileStatistics(instances, knownAuthorForInstances, unknownForInstances);
+		//printProfileStatistics(instances, knownAuthorForInstances, unknownForInstances);
 		
 		HashMap<String, Double> ngramFilter = null;
-		//ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
+		ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
 		
+		ArrayList<AccuracyResult> accuracies = new ArrayList<AccuracyResult>();
 		for(int profileSize = minProfileSize; profileSize <= maxProfileSize; profileSize+=increment){
-			computeDistances(instances, knownAuthorForInstances, unknownForInstances, profileSize, n, ngramFilter);
+			accuracies.addAll(computeDistances(instances, knownAuthorForInstances, unknownForInstances, profileSize, n, ngramFilter));
 		}
+		
+		Tools.printAccuracyForLanguage(accuracies, "EN");
+		
+		return accuracies;
 	}
 
-	private static void computeDistances(
+	private static ArrayList<AccuracyResult> computeDistances(
 			File[] instances, 
 			HashMap<String, HashMap<String, Double>> knownAuthorForInstances, 
 			HashMap<String, HashMap<String, Double>> unknownForInstances,
 			int profileSize,
 			int n,
 			HashMap<String, Double> ngramFilter ){
-		
 		
 		HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
 		HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
@@ -169,11 +178,20 @@ public class BaselineNGram {
 			}
 		}
 		
+		
+		ArrayList<AccuracyResult> accuracies = new ArrayList<AccuracyResult>();
+		
 		double accEn = AccuracyReview.getAccuracy(getJudgements(distancesEnglish));
 		double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
 		double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
 
-		System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+		accuracies.add(new AccuracyResult(n, profileSize, ngramFilter != null, ngramFilter != null ? ngramFilter.size() : 0, "EN", accEn));
+		accuracies.add(new AccuracyResult(n, profileSize, ngramFilter != null, ngramFilter != null ? ngramFilter.size() : 0, "SP", accSp));
+		accuracies.add(new AccuracyResult(n, profileSize, ngramFilter != null, ngramFilter != null ? ngramFilter.size() : 0, "GR", accGr));
+		
+		//System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+		
+		return accuracies;
 	}
 	
 	/**

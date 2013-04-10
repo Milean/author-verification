@@ -455,4 +455,46 @@ public class Tools {
 	}
 	
 	
+	public static void printAccuracyForLanguage(ArrayList<AccuracyResult> accuracies, String language){
+		Collections.sort(accuracies);
+		
+		for(AccuracyResult ar : accuracies){
+			if(ar.getLanguage().equals(language)){
+				System.out.println(ar.toString());
+			}
+		}
+	}
+
+	public static void printGroupedAccuracyForLanguage(ArrayList<AccuracyResult> accuracies, String language){
+		Collections.sort(accuracies);
+		
+		ArrayList<AccuracyResult> keys = new ArrayList<AccuracyResult>();
+		ArrayList<AccuracyResult> correctLanguage = new ArrayList<AccuracyResult>();
+		
+		int n_temp = 0;
+		for(AccuracyResult ar : accuracies){
+			if(ar.getLanguage().equals(language)){
+				if(n_temp == 0 || n_temp == ar.getN()){
+					if(n_temp == 0){
+						n_temp = ar.getN();
+					}
+					keys.add(ar);
+				}
+				correctLanguage.add(ar);
+			}
+		}
+		
+		for(AccuracyResult ar : keys){
+			String res = ""+ar.getLanguage()+"\t"+ar.getProfilesize();
+			
+			for(AccuracyResult current : correctLanguage){
+				if(current.getProfilesize() == ar.getProfilesize()){
+					res = res + current.compactString();
+				}
+			}
+			
+			System.out.println(res);
+		}
+		
+	}
 }
