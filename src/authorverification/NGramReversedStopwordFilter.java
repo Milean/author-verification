@@ -28,10 +28,20 @@ public class NGramReversedStopwordFilter {
 			System.exit(0);
 		}
 		
-		//baseNGrams(corpus, N, minProfileSize, maxProfileSize, increments)
+		//saveMostCommonNGrams(corpus, N, amount)
 		saveMostCommonNGrams(corpus, 6, 2500);
 	}
 	
+	/**
+	 * Processes all files contained in the corpus given as an argument
+	 * splits them up into n-grams and
+	 * saves the most common n-grams to a file, for later use.
+	 *   
+	 * @param corpus The directory containing (other directories) with training texts.
+	 * @param n The size of n-grams. e.g. n=3 would result in 3-grams.
+	 * @param amount The amount of n-grams to save to file. e.g. 2500 would save the 2500 most common n-grams. It will include slightly more if n-grams are tied for 2500th most common.
+	 * @throws IOException
+	 */
 	private static void saveMostCommonNGrams(File corpus, int n, int amount) throws IOException{
 		
 		File[] instances = corpus.listFiles();
@@ -45,15 +55,16 @@ public class NGramReversedStopwordFilter {
 				
 				for(File f : authorfiles){
 					System.out.println("Adding "+f.getAbsolutePath());
-					BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
 					
 					//** Different configuration options for reader. 
 					//** Use same configuration for creating filter and for running test
+					BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
 					//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
 					//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
 					//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
 					//LowercaseReader reader = new LowercaseReader(new FileReader(f));
 					//BufferedReader reader = new BufferedReader(new FileReader(f));
+
 					ngrams = Tools.addCharacterNGrams(reader, n, ngrams);
 					reader.close();
 				}
@@ -71,7 +82,4 @@ public class NGramReversedStopwordFilter {
 		
 		Tools.saveNGrams(new File("filter."+n+"gram"), mostCommon);
 	}
-	
-
-
 }

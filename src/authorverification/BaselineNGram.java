@@ -60,8 +60,6 @@ public class BaselineNGram {
 	 */
 	private static void baseNGrams(File corpus, int n, int minProfileSize, int maxProfileSize, int increment) throws IOException{
 		
-		//HashMap<String, Double> ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
-		
 		File[] instances = corpus.listFiles();
 
 		HashMap<String, HashMap<String, Double>> knownAuthorForInstances = new HashMap<String, HashMap<String, Double>>();
@@ -78,122 +76,112 @@ public class BaselineNGram {
 				HashMap<String, Double> unknown = new HashMap<String, Double>();
 				
 				for(File f : authorfiles){
+					BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
+					//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
+					//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f))));
+					//StaticNumberReader reader = new StaticNumberReader(new LowercaseReader(new FileReader(f)));
+					//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
+					//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
+					//LowercaseReader reader = new LowercaseReader(new FileReader(f));
+					//BufferedReader reader = new BufferedReader(new FileReader(f));
+
 					if(f.getName().startsWith("known")){
-						BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
-						//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
-						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f))));
-						//StaticNumberReader reader = new StaticNumberReader(new LowercaseReader(new FileReader(f)));
-						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
-						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
-						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
-						//BufferedReader reader = new BufferedReader(new FileReader(f));
 						knownAuthor = Tools.addCharacterNGrams(reader, n, knownAuthor);
-						reader.close();
 					}
 					else if(f.getName().startsWith("unknown")){
-						BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
-						//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
-						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f))));
-						//StaticNumberReader reader = new StaticNumberReader(new LowercaseReader(new FileReader(f)));
-						//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
-						//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));
-						//LowercaseReader reader = new LowercaseReader(new FileReader(f));
-						//BufferedReader reader = new BufferedReader(new FileReader(f));
 						unknown = Tools.addCharacterNGrams(reader, n, unknown);
-						reader.close();
 					}
 					else{
 						//Error: should be no other files
 						System.err.println("ERROR: Unexpected file: "+f.getAbsolutePath());
+						reader.close();
 						System.exit(1);
 					}
+					reader.close();
 				}
 				
 				knownAuthorForInstances.put(name, knownAuthor);
 				unknownForInstances.put(name, unknown);
 				
-//				if(name.startsWith("GR01")){
-//					System.out.println(knownAuthor.size()+" known Author "+n+"-grams in "+name+": "+"\n"+Tools.toString(knownAuthor));
-//				}
-
 			}
 		}
-				
-//		System.out.println("\nKNOWN AUTHOR: ");
-//		for(File instance : instances){
-//			if(instance.isDirectory()){
-//				String name = instance.getName();
-//				System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
-//			}
-//		}
-//		System.out.println("\nUNKNOWN: ");
-//		for(File instance : instances){
-//			if(instance.isDirectory()){
-//				String name = instance.getName();
-//				System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
-//			}
-//		}
+		
+		printProfileStatistics(instances, knownAuthorForInstances, unknownForInstances);
+		
+		HashMap<String, Double> ngramFilter = null;
+		//ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
 		
 		for(int profileSize = minProfileSize; profileSize <= maxProfileSize; profileSize+=increment){
-
-			HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
-			HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
-			HashMap<String, Double> distancesGreek = new HashMap<String, Double>();
-			
-			for(File instance : instances){
-				if(instance.isDirectory()){
-					
-					String name = instance.getName();
-					
-					HashMap<String, Double> knownAuthor = knownAuthorForInstances.get(name);
-					HashMap<String, Double> unknown = unknownForInstances.get(name);
-					
-					//knownAuthor = Tools.keepAllContaining(knownAuthor, ngramFilter.keySet());
-					
-					knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
-					//unknown = Tools.keepHighestN(unknown, profileSize, true);
-	
-	//				if(name.startsWith("SP")){
-	//					System.out.println("Highest frequency "+n+"-grams in "+name+": \n"+Tools.toString(knownAuthor));
-	//				}
-	
-					knownAuthor = Tools.normalizeNGrams(knownAuthor);
-					unknown = Tools.normalizeNGrams(unknown);
-					
-					double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
-	
-	//				if(name.startsWith("TEST")){
-	//					System.out.println("Distance: "+distance);
-	//				}
-					
-	//				System.out.println(""+distance);
-					if(name.startsWith("EN")){
-						distancesEnglish.put(name, distance);
-					}
-					else if(name.startsWith("SP")){
-						distancesSpanish.put(name, distance);
-					}
-					else if(name.startsWith("GR")){
-						distancesGreek.put(name, distance);
-					}
-					else if(name.startsWith("TEST")){
-						//do nothing
-					}
-					else{
-						System.out.println("ERROR, unrecognized instance language: "+name);
-						System.exit(1);
-					}
-				}
-			}
-			
-			double accEn = AccuracyReview.getAccuracy(getJudgements(distancesEnglish));
-			double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
-			double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
-	
-			System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+			computeDistances(instances, knownAuthorForInstances, unknownForInstances, profileSize, n, ngramFilter);
 		}
 	}
+
+	private static void computeDistances(
+			File[] instances, 
+			HashMap<String, HashMap<String, Double>> knownAuthorForInstances, 
+			HashMap<String, HashMap<String, Double>> unknownForInstances,
+			int profileSize,
+			int n,
+			HashMap<String, Double> ngramFilter ){
+		
+		
+		HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
+		HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
+		HashMap<String, Double> distancesGreek = new HashMap<String, Double>();
+		
+		for(File instance : instances){
+			if(instance.isDirectory()){
+				String name = instance.getName();
+				HashMap<String, Double> knownAuthor = knownAuthorForInstances.get(name);
+				HashMap<String, Double> unknown = unknownForInstances.get(name);
+				
+				//Apply filters to ngram profiles.
+				if(ngramFilter != null){
+					knownAuthor = Tools.keepAllContaining(knownAuthor, ngramFilter.keySet());
+				}
+				knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
+//				unknown = Tools.keepHighestN(unknown, profileSize, true);
+
+				//Normalize the N-gram profiles to sum to 1
+				knownAuthor = Tools.normalizeNGrams(knownAuthor);
+				unknown = Tools.normalizeNGrams(unknown);
+				
+				
+				double distance = Tools.distanceStamatatos2007(unknown, knownAuthor);
+
+//				System.out.println(""+name+"\t"+distance);
+				if(name.startsWith("EN")){
+					distancesEnglish.put(name, distance);
+				}
+				else if(name.startsWith("SP")){
+					distancesSpanish.put(name, distance);
+				}
+				else if(name.startsWith("GR")){
+					distancesGreek.put(name, distance);
+				}
+				else if(name.startsWith("TEST")){
+					//do nothing
+				}
+				else{
+					System.out.println("ERROR, unrecognized instance language: "+name);
+					System.exit(1);
+				}
+			}
+		}
+		
+		double accEn = AccuracyReview.getAccuracy(getJudgements(distancesEnglish));
+		double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
+		double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
+
+		System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
+	}
 	
+	/**
+	 * Evaluates a list of judgments per instance, returning for every instance a true/false judgment.
+	 *  
+	 * @param distances The list of judgments per instance. True means the author is considered the same for the known and unknown documents.
+	 * @return A list of true/false judgments, mapped from the instance names.
+	 */
 	private static HashMap<String, Boolean> getJudgements(HashMap<String, Double> distances){
 		HashMap<String, Boolean> judgements = new HashMap<String, Boolean>();
 		
@@ -216,6 +204,35 @@ public class BaselineNGram {
 		
 		return judgements;
 	}
+
+	/**
+	 * Prints statistics of (known and unknown) n-gram profiles for every instance.
+	 * 
+	 * @param instances The list of files (directories) containing instances.
+	 * @param knownAuthorForInstances The list of known author ngram profiles, sorted by instance
+	 * @param unknownForInstances The list of unknown categorization documents, sorted by instance
+	 */
+	public static void printProfileStatistics(File[] instances, 
+			HashMap<String, HashMap<String, Double>> knownAuthorForInstances, 
+			HashMap<String, HashMap<String, Double>> unknownForInstances ){
+		
+		System.out.println("\nKNOWN AUTHOR: ");
+		for(File instance : instances){
+			if(instance.isDirectory()){
+				String name = instance.getName();
+				System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
+			}
+		}
+		System.out.println("\nUNKNOWN: ");
+		for(File instance : instances){
+			if(instance.isDirectory()){
+				String name = instance.getName();
+				System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
+			}
+		}
+	}
+	
+
 	
 	public static double compare(String[] authorDocs, String unknownDoc){
 		return 0d;
