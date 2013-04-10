@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class BaselineNGram {
+public class BaselineNGram_FilterAdaption {
 	public static void main(String[] args) throws IOException{
 
 //		StringReader test = new StringReader("De kat krabt de krullen van de trap");
@@ -44,7 +44,7 @@ public class BaselineNGram {
 
 		//baseNGrams(corpus, N, minProfileSize, maxProfileSize, increments)
 		for(int n = 1; n<7; n++){
-			accuracies.addAll(baseNGrams(corpus, n, 5, 500, 5));
+			accuracies.addAll(baseNGrams(corpus, n, 100, 10000, 100));
 		}
 		
 		Tools.printGroupedAccuracyForLanguage(accuracies, "EN");
@@ -114,7 +114,7 @@ public class BaselineNGram {
 		//printProfileStatistics(instances, knownAuthorForInstances, unknownForInstances);
 		
 		HashMap<String, Double> ngramFilter = null;
-//		ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
+		ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
 		
 		ArrayList<AccuracyResult> accuracies = new ArrayList<AccuracyResult>();
 		for(int profileSize = minProfileSize; profileSize <= maxProfileSize; profileSize+=increment){
@@ -132,7 +132,7 @@ public class BaselineNGram {
 			HashMap<String, HashMap<String, Double>> unknownForInstances,
 			int profileSize,
 			int n,
-			HashMap<String, Double> ngramFilter ){
+			HashMap<String, Double> oldNGramFilter ){
 		
 		HashMap<String, Double> distancesEnglish = new HashMap<String, Double>();
 		HashMap<String, Double> distancesSpanish = new HashMap<String, Double>();
@@ -144,14 +144,17 @@ public class BaselineNGram {
 				HashMap<String, Double> knownAuthor = knownAuthorForInstances.get(name);
 				HashMap<String, Double> unknown = unknownForInstances.get(name);
 				
+				//TODO: temp
+				HashMap<String, Double> ngramFilter = Tools.keepHighestN(oldNGramFilter, profileSize, true);
+				
 				//Apply filters to ngram profiles.
 				if(ngramFilter != null){
 					knownAuthor = Tools.keepAllContaining(knownAuthor, ngramFilter.keySet());
 //					unknown = Tools.keepAllContaining(unknown, ngramFilter.keySet());
 				}
 
-				knownAuthor = Tools.keepHighestN(knownAuthor, profileSize, true);
-//				unknown = Tools.keepHighestN(unknown, profileSize, true);
+				knownAuthor = Tools.keepHighestN(knownAuthor, 430, true);
+//				unknown = Tools.keepHighestN(unknown, 430, true);
 
 				//Normalize the N-gram profiles to sum to 1
 				knownAuthor = Tools.normalizeNGrams(knownAuthor);
@@ -187,9 +190,9 @@ public class BaselineNGram {
 		double accSp = AccuracyReview.getAccuracy(getJudgements(distancesSpanish));
 		double accGr = AccuracyReview.getAccuracy(getJudgements(distancesGreek));
 
-		accuracies.add(new AccuracyResult(n, profileSize, ngramFilter != null, ngramFilter != null ? ngramFilter.size() : 0, "EN", accEn));
-		accuracies.add(new AccuracyResult(n, profileSize, ngramFilter != null, ngramFilter != null ? ngramFilter.size() : 0, "SP", accSp));
-		accuracies.add(new AccuracyResult(n, profileSize, ngramFilter != null, ngramFilter != null ? ngramFilter.size() : 0, "GR", accGr));
+		accuracies.add(new AccuracyResult(n, profileSize, oldNGramFilter != null, oldNGramFilter != null ? oldNGramFilter.size() : 0, "EN", accEn));
+		accuracies.add(new AccuracyResult(n, profileSize, oldNGramFilter != null, oldNGramFilter != null ? oldNGramFilter.size() : 0, "SP", accSp));
+		accuracies.add(new AccuracyResult(n, profileSize, oldNGramFilter != null, oldNGramFilter != null ? oldNGramFilter.size() : 0, "GR", accGr));
 		
 		//System.out.println(""+n+"\t"+profileSize+"\tEN\t"+accEn+"\tSP\t"+accSp+"\tGR\t"+accGr);
 		

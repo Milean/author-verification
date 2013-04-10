@@ -88,6 +88,8 @@ public class Tools {
 	 * @return A map of character n-grams, with a count how often each n-gram occurs in the given String.
 	 */
 	public static HashMap<String, Double> addCharacterNGrams(Reader reader, int n, HashMap<String, Double> ngrams) throws IOException{
+		boolean FILTERDOUBLESPACES = false;
+		
 		if(ngrams == null){
 			ngrams = new HashMap<String, Double>();
 		}
@@ -96,13 +98,40 @@ public class Tools {
 		
 		int pos = 0;
 		int token = reader.read();
+		boolean space = false;
 		while(pos < n-1){
+			if(FILTERDOUBLESPACES){
+				if(space && (char)token == ' '){
+					token = reader.read();
+					continue;
+				}
+				else if((char)token == ' '){
+					space = true;
+				}
+				else{
+					space = false;
+				}
+			}
+			
 			buffer.append((char)token);
 			token = reader.read();
 			pos++;
 		}
 
 		while(token != -1){
+			if(FILTERDOUBLESPACES){
+				if(space && (char)token == ' '){
+					token = reader.read();
+					continue;
+				}
+				else if((char)token == ' '){
+					space = true;
+				}
+				else{
+					space = false;
+				}
+			}
+			
 			buffer.append((char)token);
 			token = reader.read();
 			pos++;

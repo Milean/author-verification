@@ -29,7 +29,18 @@ public class NGramReversedStopwordFilter {
 		}
 		
 		//saveMostCommonNGrams(corpus, N, amount)
-		saveMostCommonNGrams(corpus, 6, 2500);
+//		saveMostCommonNGrams(corpus, 1,   41 );
+//		saveMostCommonNGrams(corpus, 2,  700 );
+//		saveMostCommonNGrams(corpus, 3, 3000 );
+//		saveMostCommonNGrams(corpus, 4, 4000 );
+//		saveMostCommonNGrams(corpus, 5, 5000 );
+//		saveMostCommonNGrams(corpus, 6, 5000 );
+		saveMostCommonNGrams(corpus, 1, 10000 );
+		saveMostCommonNGrams(corpus, 2, 10000 );
+		saveMostCommonNGrams(corpus, 3, 10000 );
+		saveMostCommonNGrams(corpus, 4, 10000 );
+		saveMostCommonNGrams(corpus, 5, 10000 );
+		saveMostCommonNGrams(corpus, 6, 10000 );
 	}
 	
 	/**
@@ -48,13 +59,15 @@ public class NGramReversedStopwordFilter {
 
 		HashMap<String, Double> ngrams = new HashMap<String, Double>();
 		
+		System.out.print("Adding files...");
 		for(File instance : instances){
 			if(instance.isDirectory()){
 				
 				File[] authorfiles = instance.listFiles();
 				
 				for(File f : authorfiles){
-					System.out.println("Adding "+f.getAbsolutePath());
+					//System.out.println("Adding "+f.getAbsolutePath());
+					System.out.print(".");
 					
 					//** Different configuration options for reader. 
 					//** Use same configuration for creating filter and for running test
@@ -70,14 +83,16 @@ public class NGramReversedStopwordFilter {
 				}
 			}
 		}
+		System.out.println(" done.");
 
 		int size = ngrams.size();
 		
 		System.out.println("\n"+n+"-gram profile of size "+size+": ");
-		System.out.println(Tools.statistics(ngrams, true, true));
-		System.out.println();
+//		System.out.println(Tools.statistics(ngrams, true, true));
+//		System.out.println();
 		
 		HashMap<String, Double> mostCommon = Tools.keepHighestN(ngrams, amount, true);
+		System.out.println("Most common list of size "+mostCommon.size()+"\n");
 		mostCommon = Tools.normalizeNGrams(mostCommon);
 		
 		Tools.saveNGrams(new File("filter."+n+"gram"), mostCommon);
