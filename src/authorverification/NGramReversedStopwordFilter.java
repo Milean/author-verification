@@ -1,32 +1,14 @@
 package authorverification;
 
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
-
-import com.thoughtworks.xstream.XStream;
 
 public class NGramReversedStopwordFilter {
 	public static void main(String[] args) throws IOException{
 
-//		StringReader test = new StringReader("De kat krabt de krullen van de trap");
-//		NoFormatReader reader = new NoFormatReader(test);
-//		char[] res = new char[1024];
-//		int amount = reader.read(res);
-//		System.out.println(""+amount+" characters read, in an array of size "+res.length);
-//		
-//		char[] second = Tools.removeAccents(res);
-//		
-//		System.exit(0);
-		
-		
 		//TODO: remove next four lines for command line launch
 		if(args == null || args.length == 0){
 			args = new String[1];
@@ -64,6 +46,9 @@ public class NGramReversedStopwordFilter {
 				for(File f : authorfiles){
 					System.out.println("Adding "+f.getAbsolutePath());
 					BasicAlphabetReader reader = new BasicAlphabetReader(new NoInterpunctionReader(new FileReader(f)));
+					
+					//** Different configuration options for reader. 
+					//** Use same configuration for creating filter and for running test
 					//BasicAlphabetReader reader = new BasicAlphabetReader(new LowercaseReader(new FileReader(f)));
 					//StaticNumberReader reader = new StaticNumberReader(new BasicAlphabetReader(new FileReader(f)));
 					//NoInterpunctionReader reader = new NoInterpunctionReader(new FileReader(f));

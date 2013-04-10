@@ -7,18 +7,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.nio.CharBuffer;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
-
-import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -439,6 +435,7 @@ public class Tools {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static HashMap<String, Double> loadNGrams(File file) {
 		XStream xstream = new XStream();
 		xstream.setMode(XStream.ID_REFERENCES);

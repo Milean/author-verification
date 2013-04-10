@@ -1,11 +1,9 @@
 package authorverification;
 
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashMap;
 
 public class BaselineNGram {
@@ -62,7 +60,7 @@ public class BaselineNGram {
 	 */
 	private static void baseNGrams(File corpus, int n, int minProfileSize, int maxProfileSize, int increment) throws IOException{
 		
-		HashMap<String, Double> ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
+		//HashMap<String, Double> ngramFilter = Tools.loadNGrams(new File("filter."+n+"gram"));
 		
 		File[] instances = corpus.listFiles();
 
@@ -121,20 +119,20 @@ public class BaselineNGram {
 			}
 		}
 				
-	//	System.out.println("\nKNOWN AUTHOR: ");
-		for(File instance : instances){
-			if(instance.isDirectory()){
-				String name = instance.getName();
-	//			System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
-			}
-		}
-	//	System.out.println("\nUNKNOWN: ");
-		for(File instance : instances){
-			if(instance.isDirectory()){
-				String name = instance.getName();
-	//			System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
-			}
-		}
+//		System.out.println("\nKNOWN AUTHOR: ");
+//		for(File instance : instances){
+//			if(instance.isDirectory()){
+//				String name = instance.getName();
+//				System.out.println(name+Tools.statistics(knownAuthorForInstances.get(name), false, true));
+//			}
+//		}
+//		System.out.println("\nUNKNOWN: ");
+//		for(File instance : instances){
+//			if(instance.isDirectory()){
+//				String name = instance.getName();
+//				System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
+//			}
+//		}
 		
 		for(int profileSize = minProfileSize; profileSize <= maxProfileSize; profileSize+=increment){
 
