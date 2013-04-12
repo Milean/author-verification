@@ -1,4 +1,4 @@
-package authorverification;
+package authorverification.preprocessing;
 
 
 import java.io.File;
@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
+import authorverification.Tools;
 import authorverification.reader.BasicAlphabetReader;
 import authorverification.reader.NoInterpunctionReader;
 
