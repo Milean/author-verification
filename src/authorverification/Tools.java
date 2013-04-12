@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import authorverification.judgements.AccuracyResult;
+
 import com.thoughtworks.xstream.XStream;
 
 /**

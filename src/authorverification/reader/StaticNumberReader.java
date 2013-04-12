@@ -1,18 +1,22 @@
-package authorverification;
+package authorverification.reader;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-public class LowercaseReader extends BufferedReader{
+public class StaticNumberReader extends BufferedReader{
 
-	public LowercaseReader(Reader arg0) {
+	public StaticNumberReader(Reader arg0) {
 		super(arg0);
 	}
 	
 	@Override
 	public int read() throws IOException{
-		return Character.toLowerCase(super.read());
+		int res = super.read();
+		if(Character.isDigit((char)res)){
+			res = '@';
+		}
+		return res;
 	}
 	
 	@Override
@@ -20,7 +24,9 @@ public class LowercaseReader extends BufferedReader{
 		int result = super.read(cbuf, off, len);
 		
 		for(int i = 0; i<cbuf.length; i++){
-			cbuf[i] = Character.toLowerCase(cbuf[i]);
+			if(Character.isDigit(cbuf[i])){
+				cbuf[i] = '@';
+			}
 		}
 		
 		return result;
@@ -31,7 +37,9 @@ public class LowercaseReader extends BufferedReader{
 		int result = super.read(cbuf);
 		
 		for(int i = 0; i<cbuf.length; i++){
-			cbuf[i] = Character.toLowerCase(cbuf[i]);
+			if(Character.isDigit(cbuf[i])){
+				cbuf[i] = '@';
+			}
 		}
 		
 		return result;

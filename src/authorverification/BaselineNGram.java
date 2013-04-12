@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import authorverification.judgements.AccuracyResult;
+import authorverification.judgements.AccuracyReview;
+import authorverification.reader.BasicAlphabetReader;
+import authorverification.reader.NoInterpunctionReader;
+
 public class BaselineNGram {
 	public static void main(String[] args) throws IOException{
 

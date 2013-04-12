@@ -1,31 +1,31 @@
-package authorverification;
+package authorverification.reader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 
-/**
- * Removes interpunction.
- * Keeps spaces, digits and letter-symbols.
- * 
- * @author af13003
- *
- */
-public class NoInterpunctionReader extends LowercaseReader{
+import authorverification.Tools;
 
-	public NoInterpunctionReader(Reader arg0) {
+public class BasicAlphabetReader extends BufferedReader{
+
+	public BasicAlphabetReader(Reader arg0) {
 		super(arg0);
 	}
 	
 	@Override
 	public int read() throws IOException{
 		int ch = super.read();
-		while(ch != ' ' && !Character.isDigit((char)ch) && !Character.isLetter((char)ch)){
-			if(ch == -1){
-				return -1;
-			}
-			ch = super.read();
+		
+		if(ch == -1){
+			return -1;
 		}
-		return ch;
+		
+		char[] cbuf = new char[1];
+		cbuf[0] = (char)ch;
+		cbuf = Tools.removeAccents(cbuf);
+				
+		return (int)cbuf[0];
+
 	}
 	
 	@Override
@@ -34,7 +34,7 @@ public class NoInterpunctionReader extends LowercaseReader{
 			return 0;
 		}
 		
-		int ch = read();
+		int ch = super.read();
 		if(ch == -1){
 			return -1;
 		}
@@ -50,6 +50,11 @@ public class NoInterpunctionReader extends LowercaseReader{
 			}
 
 			ch = read();
+		}
+		
+		char[] basicbuf = Tools.removeAccents(cbuf);
+		for(int i = off; i<cbuf.length && i<off+len; i++){
+			cbuf[i] = basicbuf[i];
 		}
 		
 		return amount;

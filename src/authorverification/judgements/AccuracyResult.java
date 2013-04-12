@@ -1,4 +1,4 @@
-package authorverification;
+package authorverification.judgements;
 
 public class AccuracyResult implements Comparable<Object>{
 	private int n;
