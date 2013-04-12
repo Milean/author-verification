@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import authorverification.judgements.AccuracyResult;
+import authorverification.judgements.JudgementDistance;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -527,5 +528,37 @@ public class Tools {
 			System.out.println(res);
 		}
 		
+	}
+	
+	public static void printJudgementGroupDistances(ArrayList<JudgementDistance> judDistances){
+		//Calculate the average distance of true positives and true negatives
+		double avgPos = 0d;
+		double countPos = 0d;
+		double avgNeg = 0d;
+		double countNeg = 0d;
+		double accuracy = 0d;
+		for(JudgementDistance jd : judDistances){
+			if(jd.getTrueJudgement()){
+				countPos++;
+				avgPos += jd.getDistance();
+			}
+			else{
+				countNeg++;
+				avgNeg += jd.getDistance();
+			}
+			
+			if(jd.getJudgement() == jd.getTrueJudgement()){
+				accuracy++;
+			}
+		}
+		
+		avgPos /= countPos;
+		avgNeg /= countNeg;
+		accuracy /= (double)judDistances.size();
+		double percDist = 1d - (avgPos / avgNeg);
+		
+		double oneNumberSaysAll = percDist * accuracy;
+		
+		BaselineNGram.resultOutput.println("Acc/PosAvg/NegAvg/PercDist/measure"+"\t"+accuracy+"\t"+avgPos+"\t"+avgNeg+"\t"+percDist+"\t"+oneNumberSaysAll);
 	}
 }
