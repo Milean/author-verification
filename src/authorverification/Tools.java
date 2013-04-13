@@ -7,18 +7,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.nio.CharBuffer;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 
-import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import authorverification.judgements.AccuracyResult;
+import authorverification.judgements.JudgementDistance;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -92,6 +91,8 @@ public class Tools {
 	 * @return A map of character n-grams, with a count how often each n-gram occurs in the given String.
 	 */
 	public static HashMap<String, Double> addCharacterNGrams(Reader reader, int n, HashMap<String, Double> ngrams) throws IOException{
+		boolean FILTERDOUBLESPACES = false;
+		
 		if(ngrams == null){
 			ngrams = new HashMap<String, Double>();
 		}
@@ -100,13 +101,40 @@ public class Tools {
 		
 		int pos = 0;
 		int token = reader.read();
+		boolean space = false;
 		while(pos < n-1){
+			if(FILTERDOUBLESPACES){
+				if(space && (char)token == ' '){
+					token = reader.read();
+					continue;
+				}
+				else if((char)token == ' '){
+					space = true;
+				}
+				else{
+					space = false;
+				}
+			}
+			
 			buffer.append((char)token);
 			token = reader.read();
 			pos++;
 		}
 
 		while(token != -1){
+			if(FILTERDOUBLESPACES){
+				if(space && (char)token == ' '){
+					token = reader.read();
+					continue;
+				}
+				else if((char)token == ' '){
+					space = true;
+				}
+				else{
+					space = false;
+				}
+			}
+			
 			buffer.append((char)token);
 			token = reader.read();
 			pos++;
@@ -439,6 +467,7 @@ public class Tools {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static HashMap<String, Double> loadNGrams(File file) {
 		XStream xstream = new XStream();
 		xstream.setMode(XStream.ID_REFERENCES);
@@ -458,4 +487,78 @@ public class Tools {
 	}
 	
 	
+	public static void printAccuracyForLanguage(ArrayList<AccuracyResult> accuracies, String language){
+		Collections.sort(accuracies);
+		
+		for(AccuracyResult ar : accuracies){
+			if(ar.getLanguage().equals(language)){
+				System.out.println(ar.toString());
+			}
+		}
+	}
+
+	public static void printGroupedAccuracyForLanguage(ArrayList<AccuracyResult> accuracies, String language){
+		Collections.sort(accuracies);
+		
+		ArrayList<AccuracyResult> keys = new ArrayList<AccuracyResult>();
+		ArrayList<AccuracyResult> correctLanguage = new ArrayList<AccuracyResult>();
+		
+		int n_temp = 0;
+		for(AccuracyResult ar : accuracies){
+			if(ar.getLanguage().equals(language)){
+				if(n_temp == 0 || n_temp == ar.getN()){
+					if(n_temp == 0){
+						n_temp = ar.getN();
+					}
+					keys.add(ar);
+				}
+				correctLanguage.add(ar);
+			}
+		}
+		
+		for(AccuracyResult ar : keys){
+			String res = ""+ar.getLanguage()+"\t"+ar.getProfilesize();
+			
+			for(AccuracyResult current : correctLanguage){
+				if(current.getProfilesize() == ar.getProfilesize()){
+					res = res + current.compactString();
+				}
+			}
+			
+			System.out.println(res);
+		}
+		
+	}
+	
+	public static void printJudgementGroupDistances(ArrayList<JudgementDistance> judDistances){
+		//Calculate the average distance of true positives and true negatives
+		double avgPos = 0d;
+		double countPos = 0d;
+		double avgNeg = 0d;
+		double countNeg = 0d;
+		double accuracy = 0d;
+		for(JudgementDistance jd : judDistances){
+			if(jd.getTrueJudgement()){
+				countPos++;
+				avgPos += jd.getDistance();
+			}
+			else{
+				countNeg++;
+				avgNeg += jd.getDistance();
+			}
+			
+			if(jd.getJudgement() == jd.getTrueJudgement()){
+				accuracy++;
+			}
+		}
+		
+		avgPos /= countPos;
+		avgNeg /= countNeg;
+		accuracy /= (double)judDistances.size();
+		double percDist = 1d - (avgPos / avgNeg);
+		
+		double oneNumberSaysAll = percDist * accuracy;
+		
+		BaselineNGram.resultOutput.println("Acc/PosAvg/NegAvg/PercDist/measure"+"\t"+accuracy+"\t"+avgPos+"\t"+avgNeg+"\t"+percDist+"\t"+oneNumberSaysAll);
+	}
 }

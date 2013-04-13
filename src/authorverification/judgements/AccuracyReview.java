@@ -1,4 +1,4 @@
-package authorverification;
+package authorverification.judgements;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,23 +35,26 @@ public class AccuracyReview {
 		correct = 0;
 	}
 	
-	public void addJudgement(String instance, boolean judgement){
+	public boolean addJudgement(String instance, boolean judgement){
 		if(Arrays.binarySearch(positives, instance) >= 0){
 			judgementCount++;
 			if(judgement){
 				correct++;
+				return true;
 			}
 		}
 		else if(Arrays.binarySearch(negatives, instance) >= 0){
 			judgementCount++;
 			if(!judgement){
 				correct++;
+				return true;
 			}
 		}
 		else{
 			//Unknown instance. This AccuracyReview can't judge it.
 			System.err.println("Unknown author verification instance: "+instance);
 		}
+		return false;
 	}
 	
 	public int totalAmount(){
