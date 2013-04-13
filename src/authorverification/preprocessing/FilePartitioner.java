@@ -42,7 +42,7 @@ public class FilePartitioner {
 				File out = new File(f.getAbsolutePath()+".part"+part);
 				FileWriter fw = new FileWriter(out);
 
-				for(int i = 0; c != -1 && i<10000000; i++){
+				for(int i = 0; c != -1 && i<bytesPerFile; i++){
 					fw.write(c);
 					c = fr.read();
 				}
