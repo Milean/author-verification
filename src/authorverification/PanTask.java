@@ -30,10 +30,15 @@ public class PanTask {
 		
 		File corpus = new File(args[0]);
 		if(!corpus.isDirectory()){
-			System.out.println("First parameter is not a directory. Expected: [input path] [output path]");
+			System.out.println("First parameter is not a directory: "+args[0]+". Expected: [input path] [output path]");
 			System.exit(0);
 		}
 
+		File outputdir = new File(args[1]);
+		if(!outputdir.isDirectory()){
+			System.out.println("Second parameter is not a directory: "+args[1]+". Expected: [input path] [output path]");
+			System.exit(0);
+		}
 		resultOutput = new PrintWriter(new FileWriter(new File(args[1]+"/answers.txt")));
 		
 		baseNGrams(corpus, "EN", 4, 2300);
