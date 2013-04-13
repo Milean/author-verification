@@ -17,23 +17,24 @@ public class PanTask {
 	public static PrintWriter resultOutput;
 
 	public static void main(String[] args) throws IOException{
-		if(args == null || args.length == 0){
-			args = new String[1];
+		if(args == null || args.length < 2){
+			args = new String[2];
 			args[0] = "corpus/training";
+			args[1] = ".";
 		}
 		
-		if(args.length == 0){
-			System.out.println("Not enough parameters given. Expected: [Directory path]");
+		if(args.length < 2){
+			System.out.println("Not enough parameters given. Expected: [input path] [output path]");
 			System.exit(0);
 		}
 		
 		File corpus = new File(args[0]);
 		if(!corpus.isDirectory()){
-			System.out.println("First parameter is not a directory. Expected: [Directory path]");
+			System.out.println("First parameter is not a directory. Expected: [input path] [output path]");
 			System.exit(0);
 		}
 
-		resultOutput = new PrintWriter(new FileWriter(new File("answers.txt")));
+		resultOutput = new PrintWriter(new FileWriter(new File(args[1]+"/answers.txt")));
 		
 		baseNGrams(corpus, "EN", 4, 2300);
 		baseNGrams(corpus, "GR", 3, 1500);

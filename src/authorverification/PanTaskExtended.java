@@ -17,9 +17,10 @@ public class PanTaskExtended {
 	public static PrintWriter resultOutput;
 
 	public static void main(String[] args) throws IOException{
-		if(args == null || args.length == 0){
-			args = new String[1];
+		if(args == null || args.length < 2){
+			args = new String[2];
 			args[0] = "corpus/gutenberg_cases";
+			args[1] = ".";
 		}
 		
 		if(args.length == 0){
@@ -32,8 +33,8 @@ public class PanTaskExtended {
 			System.out.println("First parameter is not a directory. Expected: [Directory path]");
 			System.exit(0);
 		}
-
-		resultOutput = new PrintWriter(new FileWriter(new File("answers.txt")));
+		
+		resultOutput = new PrintWriter(new FileWriter(new File(args[1]+"/answers.txt")));
 		
 		baseNGrams(corpus, "EN", 4, 2300);
 		baseNGrams(corpus, "GR", 3, 1500);
