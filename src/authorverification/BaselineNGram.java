@@ -17,15 +17,15 @@ import authorverification.reader.*;
 public class BaselineNGram {
 	
 	public static final String[] READERS = {
-//		  "BAR/NoIR"
-//		, "BAR/LCR", 
-		"SNR/BAR/NoIR" 
-//		, "SNR/LCR", 
-//		, "SNR/BAR",
-//		, "SNR/NoIR" 
-//		, "NoIR" 
-//		, "LCR" 
-//		, "BR"
+		  "BAR/NoIR"
+		, "BAR/LCR" 
+		, "SNR/BAR/NoIR" 
+		, "SNR/LCR" 
+		, "SNR/BAR" 
+		, "SNR/NoIR" 
+		, "NoIR" 
+		, "LCR" 
+		, "BR"
 		};
 
 	private static String readerConfig = "No";
@@ -369,11 +369,5 @@ public class BaselineNGram {
 				System.out.println(name+Tools.statistics(unknownForInstances.get(name), false, true));
 			}
 		}
-	}
-	
-
-	
-	public static double compare(String[] authorDocs, String unknownDoc){
-		return 0d;
 	}
 }
